@@ -25,12 +25,11 @@ const Footer = () => {
 
           {/* Coluna 2: Menu Rápido */}
           <div className="flex flex-col items-center md:items-start">
-            <h4 className="text-[#3d2c2c] font-sans font-bold tracking-widest mb-6 text-sm">MENU RÁPIDO</h4>
-            <nav className="flex flex-col gap-3 text-sm">
-              <a href="#inicio" className="font-sans text-[#5a4a42] hover:text-[#a88a87] transition-colors">Início</a>
-              <a href="#catalogo" className="font-sans text-[#5a4a42] hover:text-[#a88a87] transition-colors">Catálogo</a>
-              <a href="#sobre-nos" className="font-sans text-[#5a4a42] hover:text-[#a88a87] transition-colors">Sobre Nós</a>
-            </nav>
+              <h4 className="text-[#3d2c2c] font-sans font-bold tracking-widest mb-6 text-sm">MENU RÁPIDO</h4>
+              <nav className="flex flex-col gap-3 text-sm">
+                <a href="#inicio" className="font-sans text-[#5a4a42] hover:text-[#a88a87] transition-colors">Início</a>
+                <a href="#catalogo" className="font-sans text-[#5a4a42] hover:text-[#a88a87] transition-colors">Catálogo</a>
+              </nav>
           </div>
 
           {/* Coluna 3: Contatos Diretos */}

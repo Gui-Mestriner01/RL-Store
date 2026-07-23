@@ -2,53 +2,69 @@ import React from 'react';
 import { FaInstagram } from 'react-icons/fa';
 
 const InstagramFeed = () => {
+  // Array com o nome das fotos que você vai colocar na pasta public.
+  // Se quiser, pode colar links direto da internet aqui também!
   const instaPhotos = [
-    "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=300&q=80",
-    "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=300&q=80",
-    "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=300&q=80",
-    "https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=300&q=80"
+    "/insta1.jpg", 
+    "/insta2.jpg", 
+    "/insta3.jpg", 
+    "/insta4.jpg"
   ];
 
   return (
-    <section className="px-8 md:px-16 py-16 max-w-[1400px] mx-auto">
-      <div className="bg-[#dfcbc9]/40 rounded-[2rem] p-8 md:p-12 flex flex-col lg:flex-row items-center justify-between gap-10 shadow-sm border border-[#dfcbc9]/60">
+    <section className="py-20 bg-white">
+      <div className="max-w-[1200px] mx-auto px-6 md:px-16">
         
-        {/* Chamada para Ação */}
-        <div className="flex items-center gap-6 lg:w-1/3 w-full">
+        {/* Título da Seção */}
+        <div className="flex flex-col items-center text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-serif text-[#3d2c2c] mb-3">
+            Siga <span className="italic text-[#a88a87]">@rl.modastore</span>
+          </h2>
+          <p className="text-[#5a4a42] text-base max-w-md">
+            Acompanhe as novidades, bastidores e looks inspiradores diariamente no nosso perfil.
+          </p>
+        </div>
+
+        {/* Grade de Fotos (Formato Quadrado igual ao Insta) */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+          {instaPhotos.map((photo, index) => (
+            <a 
+              key={index} 
+              href="https://www.instagram.com/rl.modastore/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="relative group aspect-square overflow-hidden rounded-md bg-[#f4ebe9]"
+            >
+              <img 
+                src={photo} 
+                alt={`Postagem do Instagram ${index + 1}`} 
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                // O onError abaixo garante que, se você ainda não tiver posto a foto na pasta public, 
+                // ele carrega um quadrado cinza temporário para o site não quebrar.
+                onError={(e) => { e.target.src = `https://via.placeholder.com/400x400?text=Foto+Insta+${index + 1}` }}
+              />
+              
+              {/* Filtro escuro com o ícone do Insta que aparece ao passar o mouse (efeito premium!) */}
+              <div className="absolute inset-0 bg-[#3d2c2c]/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <FaInstagram className="text-white text-4xl" />
+              </div>
+            </a>
+          ))}
+        </div>
+
+        {/* Botão para ir para o Perfil */}
+        <div className="flex justify-center mt-12">
           <a 
             href="https://www.instagram.com/rl.modastore/" 
             target="_blank" 
-            rel="noreferrer"
-            className="text-6xl text-[#a88a87] p-4 bg-white rounded-full shadow-sm hover:scale-105 transition-transform"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 px-8 py-3 border-2 border-[#a88a87] text-[#a88a87] rounded-full font-bold tracking-wide hover:bg-[#a88a87] hover:text-white transition-all text-sm font-sans"
           >
-            <FaInstagram />
+            <FaInstagram className="text-xl" />
+            IR PARA O PERFIL
           </a>
-          <div>
-            <h3 className="text-2xl font-serif text-[#3d2c2c] mb-1">Siga nosso Instagram</h3>
-            <a 
-              href="https://www.instagram.com/rl.modastore/" 
-              target="_blank" 
-              rel="noreferrer"
-              className="text-[#9c6662] font-medium text-sm mb-2 hover:underline"
-            >
-              @rl.modastore
-            </a>
-            <p className="text-[#5a4a42] text-sm mt-1">Novidades, inspirações e promoções exclusivas todos os dias!</p>
-          </div>
         </div>
 
-        {/* Grade de Fotos Atualizada - Sem barra de rolagem e fotos 100% quadradas */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 lg:w-2/3 w-full">
-          {instaPhotos.map((photo, index) => (
-            <img 
-              key={index} 
-              src={photo} 
-              alt={`Instagram post ${index + 1}`} 
-              className="w-full aspect-square object-cover rounded-2xl shadow-md hover:scale-105 transition-transform duration-300 cursor-pointer" 
-            />
-          ))}
-        </div>
-        
       </div>
     </section>
   );
