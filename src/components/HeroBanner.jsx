@@ -3,7 +3,8 @@ import React from 'react';
 const HeroBanner = () => {
   // A altura foi levemente reduzida para aproximar a seção de baixo
   return (
-    <section className="relative w-full pt-12 pb-16 md:pt-16 md:pb-24 overflow-hidden bg-gradient-to-r from-[#fcfaf9] to-[#f4ebe9]">
+    // OLHA O id="inicio" AQUI NESSA LINHA DE BAIXO:
+    <section id="inicio" className="relative w-full pt-12 pb-16 md:pt-16 md:pb-24 overflow-hidden bg-gradient-to-r from-[#fcfaf9] to-[#f4ebe9]">
       
       <div className="absolute bottom-0 -right-[15%] md:-right-[5%] lg:right-[-2%] w-[90%] md:w-[65%] lg:w-[55%] z-0 pointer-events-none">
         <img 
