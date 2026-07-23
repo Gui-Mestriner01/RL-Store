@@ -1,10 +1,9 @@
 import React from 'react';
 
 const HeroBanner = () => {
-  // A altura foi levemente reduzida para aproximar a seção de baixo
   return (
-    // OLHA O id="inicio" AQUI NESSA LINHA DE BAIXO:
-    <section id="inicio" className="relative w-full pt-12 pb-16 md:pt-16 md:pb-24 overflow-hidden bg-gradient-to-r from-[#fcfaf9] to-[#f4ebe9]">
+    // Aumentamos o pt-12 para pt-24 e o pb-16 para pb-32 para dar mais "respiro" no mobile
+    <section id="inicio" className="relative w-full pt-24 pb-32 md:pt-16 md:pb-24 overflow-hidden bg-gradient-to-r from-[#fcfaf9] to-[#f4ebe9]">
       
       <div className="absolute bottom-0 -right-[15%] md:-right-[5%] lg:right-[-2%] w-[90%] md:w-[65%] lg:w-[55%] z-0 pointer-events-none">
         <img 
@@ -18,7 +17,6 @@ const HeroBanner = () => {
         
         <div className="w-full md:w-3/5 flex flex-col items-center md:items-start text-center md:text-left">
           
-          {/* LOGO DO BANNER: Adicionado 'hidden md:block' para sumir no celular e limpar a tela */}
           <img 
             src="/logo.png" 
             alt="RL Store" 
@@ -34,7 +32,6 @@ const HeroBanner = () => {
             Peças selecionadas para realçar sua beleza e confiança todos os dias.
           </p>
           
-          {/* BOTÃO ALTERADO PARA ÂNCORA: Agora o clique leva direto para a seção das roupas */}
           <a 
             href="#catalogo" 
             className="inline-block px-10 py-4 bg-[#a88a87] text-white rounded-full font-bold tracking-wider hover:bg-[#9c6662] transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 font-sans"
