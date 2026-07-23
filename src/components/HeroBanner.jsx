@@ -18,10 +18,11 @@ const HeroBanner = () => {
         
         <div className="w-full md:w-3/5 flex flex-col items-center md:items-start text-center md:text-left">
           
+          {/* LOGO DO BANNER: Adicionado 'hidden md:block' para sumir no celular e limpar a tela */}
           <img 
             src="/logo.png" 
             alt="RL Store" 
-            className="w-48 md:w-56 lg:w-64 mb-8 drop-shadow-sm" 
+            className="hidden md:block w-48 md:w-56 lg:w-64 mb-8 drop-shadow-sm" 
           />
           
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-sans font-semibold tracking-tight text-[#3d2c2c] mb-6 leading-tight">
@@ -33,9 +34,13 @@ const HeroBanner = () => {
             Peças selecionadas para realçar sua beleza e confiança todos os dias.
           </p>
           
-          <button className="px-10 py-4 bg-[#a88a87] text-white rounded-full font-bold tracking-wider hover:bg-[#9c6662] transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 font-sans">
+          {/* BOTÃO ALTERADO PARA ÂNCORA: Agora o clique leva direto para a seção das roupas */}
+          <a 
+            href="#catalogo" 
+            className="inline-block px-10 py-4 bg-[#a88a87] text-white rounded-full font-bold tracking-wider hover:bg-[#9c6662] transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 font-sans"
+          >
             VER CATÁLOGO
-          </button>
+          </a>
         </div>
 
       </div>
