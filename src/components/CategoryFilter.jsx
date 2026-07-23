@@ -1,36 +1,37 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 const CategoryFilter = () => {
-  // Lista de categorias (copiado do seu design)
-  const categories = ['Todos', 'Vestidos', 'Blusas', 'Calças', 'Conjuntos', 'Outros'];
+  // Categorias da sua loja
+  const categories = ['TODOS', 'VESTIDOS', 'BLUSAS', 'CALÇAS', 'CONJUNTOS', 'OUTROS'];
   
-  // Estado para controlar qual categoria está selecionada
-  const [selectedCategory, setSelectedCategory] = useState('Todos');
+  // Por enquanto vamos deixar 'TODOS' como ativo fixo só para ver o visual
+  const activeCategory = 'TODOS';
 
   return (
-    <section className="px-8 md:px-16 py-12 max-w-[1400px] mx-auto text-center">
-      {/* Título da Seção */}
-      <div className="flex flex-col items-center justify-center text-[#7a5c58] mb-12">
-        <span className="text-3xl font-serif tracking-wide drop-shadow-sm">Catálogo</span>
-        <div className="w-20 h-0.5 bg-[#dfcbc9] mt-2"></div> {/* Linha decorativa sutil */}
+    <section className="py-10 px-4 max-w-4xl mx-auto flex flex-col items-center animate-fade-in">
+      
+      {/* Título elegante */}
+      <div className="text-center mb-8">
+        <h2 className="text-3xl md:text-4xl font-serif text-[#3d2c2c] mb-3">Catálogo</h2>
+        <div className="h-[2px] w-16 bg-[#dfcbc9] mx-auto rounded-full"></div>
       </div>
 
-      {/* Barra de Filtros */}
-      <div className="flex flex-wrap justify-center gap-3 md:gap-4 text-xs font-semibold tracking-wide text-[#3d2c2c] bg-white p-3 rounded-full shadow-md max-w-xl mx-auto">
+      {/* Container dos botões de filtro (sem o fundo branco gigante) */}
+      <div className="flex flex-wrap justify-center gap-3 md:gap-4">
         {categories.map((category) => (
           <button
             key={category}
-            onClick={() => setSelectedCategory(category)}
-            className={`px-5 py-2.5 rounded-full uppercase transition-all duration-300 ${
-              selectedCategory === category
-                ? 'bg-[#b57b77] text-white shadow-lg' // Estilo selecionado
-                : 'bg-transparent text-[#7a5c58] hover:bg-[#dfcbc9]/30 hover:text-[#3d2c2c]' // Estilo não selecionado
+            className={`px-5 md:px-6 py-2 md:py-2.5 rounded-full text-xs md:text-sm font-bold tracking-wider uppercase transition-all duration-300 ${
+              activeCategory === category
+                ? 'bg-[#a88a87] text-white shadow-md scale-105' // Visual do botão selecionado
+                : 'bg-transparent border-2 border-[#dfcbc9]/50 text-[#8c736e] hover:border-[#a88a87] hover:text-[#5a4a42]' // Visual dos inativos
             }`}
           >
             {category}
           </button>
         ))}
       </div>
+      
     </section>
   );
 };
