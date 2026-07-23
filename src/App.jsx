@@ -7,7 +7,7 @@ import BenefitsBar from './components/BenefitsBar';
 import InstagramFeed from './components/InstagramFeed';
 import Footer from './components/Footer';
 import BottomNav from './components/BottomNav'; 
-import Favoritos from './components/Favoritos';
+import Favoritos from './components/Favoritos'; // <-- IMPORTANTE ESTAR AQUI
 
 function App() {
   const [activeTab, setActiveTab] = useState('home');
@@ -22,25 +22,26 @@ function App() {
         </div>
       </div>
 
-      {/* Grid de Produtos focado em conversão! */}
       <div className={`${(activeTab === 'home' || activeTab === 'catalog') ? 'block' : 'hidden'} md:block`}>
         <CategoryFilter />
         <ProductGrid />
       </div>
 
-      {/* Tela de Favoritos inteligente */}
+      {/* MÁGICA DOS FAVORITOS: Trocamos o texto fixo pelo componente de verdade! */}
       {activeTab === 'favorites' && (
         <div className="md:hidden animate-fade-in">
           <Favoritos />
         </div>
       )}
       
+      {/* INSTAGRAM E BENEFÍCIOS: Removi o "hidden" para aparecer no mobile! */}
       <div className={`${activeTab === 'home' ? 'block' : 'hidden'} md:block`}>
         <BenefitsBar />
         <InstagramFeed />
       </div>
       
-      <div className="hidden md:block">
+      {/* FOOTER: Removi o "hidden" e adicionei pb-24 para o menu debaixo não tampar o texto! */}
+      <div className={`${activeTab === 'home' ? 'block' : 'hidden'} md:block pb-24 md:pb-0`}>
         <Footer />
       </div>
       

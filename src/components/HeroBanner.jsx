@@ -2,8 +2,9 @@ import React from 'react';
 
 const HeroBanner = () => {
   return (
-    // Aumentamos o pt-12 para pt-24 e o pb-16 para pb-32 para dar mais "respiro" no mobile
-    <section id="inicio" className="relative w-full pt-24 pb-32 md:pt-16 md:pb-24 overflow-hidden bg-gradient-to-r from-[#fcfaf9] to-[#f4ebe9]">
+    // Ajustamos o pt-24 para pt-12 para tirar aquele buraco branco gigante no topo do celular,
+    // mantendo um espaço confortável (pb-24) antes de chegar no botão e na seção de baixo.
+    <section id="inicio" className="relative w-full pt-12 pb-24 md:pt-16 md:pb-24 overflow-hidden bg-gradient-to-r from-[#fcfaf9] to-[#f4ebe9]">
       
       <div className="absolute bottom-0 -right-[15%] md:-right-[5%] lg:right-[-2%] w-[90%] md:w-[65%] lg:w-[55%] z-0 pointer-events-none">
         <img 
@@ -17,6 +18,10 @@ const HeroBanner = () => {
         
         <div className="w-full md:w-3/5 flex flex-col items-center md:items-start text-center md:text-left">
           
+          {/* CHARME MOBILE: Esse tracinho aparece só no celular para preencher o vazio deixado pela logo e dar equilíbrio visual */}
+          <div className="md:hidden w-12 h-1 bg-[#a88a87] mb-6 rounded-full"></div>
+
+          {/* LOGO: Oculta no mobile para não brigar com o cabeçalho, mas visível no PC */}
           <img 
             src="/logo.png" 
             alt="RL Store" 
