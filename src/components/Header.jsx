@@ -1,7 +1,8 @@
 import React from 'react';
 import { FaWhatsapp, FaInstagram } from 'react-icons/fa';
 
-const Header = () => {
+// 1. Adicionamos o "onOpenFavorites" para receber o controle do App.jsx
+const Header = ({ onOpenFavorites }) => {
   return (
     <header className="w-full bg-[#f4ebe9] border-b border-[#dfcbc9]/40 sticky top-0 z-50 shadow-sm">
       <div className="max-w-[1200px] mx-auto px-6 py-4 flex items-center justify-between">
@@ -21,6 +22,15 @@ const Header = () => {
         <nav className="hidden md:flex items-center gap-8">
           <a href="#inicio" className="text-xs font-sans font-semibold tracking-widest text-[#3d2c2c] hover:text-[#a88a87] transition-colors">INÍCIO</a>
           <a href="#catalogo" className="text-xs font-sans font-semibold tracking-widest text-[#3d2c2c] hover:text-[#a88a87] transition-colors">CATÁLOGO</a>
+          
+          {/* 2. Transformamos o link em um botão que abre a janela de Favoritos */}
+          <button 
+            onClick={onOpenFavorites}
+            className="text-xs font-sans font-semibold tracking-widest text-[#3d2c2c] hover:text-[#a88a87] transition-colors uppercase"
+          >
+            FAVORITOS
+          </button>
+          
           <a href="#contato" className="text-xs font-sans font-semibold tracking-widest text-[#3d2c2c] hover:text-[#a88a87] transition-colors">CONTATO</a>
         </nav>
 
