@@ -71,6 +71,7 @@ function App() {
         <InstagramFeed />
       </div>
       
+       
       {/* Ajuste: O rodapé agora também aparece na aba de Favoritos no celular */}
       <div className={`${(activeTab === 'home' || activeTab === 'favorites') ? 'block' : 'hidden'} md:block pb-24 md:pb-0`}>
         <Footer />
