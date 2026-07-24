@@ -11,14 +11,16 @@ import Favoritos from './components/Favoritos';
 
 function App() {
   const [activeTab, setActiveTab] = useState('home');
-  // 1. Criamos um "controle remoto" para abrir e fechar a janela do PC
+  // 1. Criamos um "controle remoto" para abrir e fechar a janela de favoritos no PC
   const [showFavoritesModal, setShowFavoritesModal] = useState(false);
+  
+  // 2. Criamos o "controle remoto" do filtro de categorias (começa sempre mostrando 'TODOS')
+  const [selectedCategory, setSelectedCategory] = useState('TODOS');
 
   return (
     <div className="min-h-screen bg-[#f3eae8] font-sans text-[#4a3b32] pb-20 md:pb-0 relative">
       
       <div className="bg-gradient-to-b from-[#dfcbc9] to-[#f3eae8]">
-        {/* 2. Entregamos o botão do controle remoto para o Header */}
         <Header onOpenFavorites={() => setShowFavoritesModal(true)} />
         
         <div className={`${activeTab === 'home' ? 'block' : 'hidden'} md:block`}>
@@ -26,9 +28,10 @@ function App() {
         </div>
       </div>
 
+      {/* Entregamos o controle remoto da categoria para o Filtro e para a Grade de Roupas */}
       <div className={`${(activeTab === 'home' || activeTab === 'catalog') ? 'block' : 'hidden'} md:block`}>
-        <CategoryFilter />
-        <ProductGrid />
+        <CategoryFilter activeCategory={selectedCategory} setActiveCategory={setSelectedCategory} />
+        <ProductGrid activeCategory={selectedCategory} />
       </div>
 
       {/* FAVORITOS NO CELULAR: Continua igual, aparecendo como uma aba */}
@@ -68,7 +71,8 @@ function App() {
         <InstagramFeed />
       </div>
       
-      <div className={`${activeTab === 'home' ? 'block' : 'hidden'} md:block pb-24 md:pb-0`}>
+      {/* Ajuste: O rodapé agora também aparece na aba de Favoritos no celular */}
+      <div className={`${(activeTab === 'home' || activeTab === 'favorites') ? 'block' : 'hidden'} md:block pb-24 md:pb-0`}>
         <Footer />
       </div>
       

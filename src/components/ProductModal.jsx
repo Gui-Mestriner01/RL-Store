@@ -35,21 +35,20 @@ const ProductModal = ({ product, onClose }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6 bg-black/60 backdrop-blur-sm transition-opacity" onClick={onClose}>
       
-      {/* Modal levemente mais largo (max-w-5xl) para acomodar a foto maior */}
       <div className="bg-[#fcfaf9] w-full max-w-5xl rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row relative max-h-[95vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         
-        <button onClick={onClose} className="absolute top-4 right-4 text-[#a88a87] bg-white/80 p-2 rounded-full hover:bg-[#dfcbc9] hover:text-[#3d2c2c] text-xl z-10 transition-all shadow-sm">
+        <button onClick={onClose} className="absolute top-4 right-4 text-[#a88a87] bg-white/90 p-2 rounded-full hover:bg-[#dfcbc9] hover:text-[#3d2c2c] text-xl z-20 transition-all shadow-md">
           <FaTimes />
         </button>
 
-        {/* Lado Esquerdo - Galeria (Aumentado para 55% do espaço) */}
-        <div className="w-full md:w-[55%] p-6 md:p-8 flex gap-4 md:gap-5 bg-white">
+        {/* Lado Esquerdo - Galeria Mista (Vertical no PC, Horizontal no Celular) */}
+        <div className="w-full md:w-[55%] p-5 md:p-8 flex flex-col md:flex-row gap-4 md:gap-5 bg-white">
           
-          {/* Miniaturas com largura fixa (w-24) e barra de rolagem invisível */}
+          {/* 1. MINIATURAS PC (Vertical, escondido no celular) */}
           {gallery.length > 1 && (
             <div 
               className="hidden md:flex flex-col gap-3 w-20 md:w-24 shrink-0 overflow-y-auto max-h-[600px]" 
-              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }} // Esconde a barra de rolagem feia
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
               {gallery.map((img, index) => (
                 <img 
@@ -63,17 +62,35 @@ const ProductModal = ({ product, onClose }) => {
             </div>
           )}
           
-          {/* Imagem Principal Maior */}
-          <div className="flex-1">
+          {/* IMAGEM PRINCIPAL */}
+          <div className="flex-1 w-full relative">
             {mainImage ? (
               <img src={mainImage} alt={product.nome} className="w-full aspect-[3/4] object-cover rounded-2xl shadow-sm" />
             ) : (
               <div className="w-full aspect-[3/4] bg-gray-100 rounded-2xl flex items-center justify-center text-sm text-gray-400">Sem Imagem</div>
             )}
           </div>
+
+          {/* 2. MINIATURAS CELULAR (Horizontal, arrastável, escondido no PC) */}
+          {gallery.length > 1 && (
+            <div 
+              className="flex md:hidden w-full overflow-x-auto gap-3 pb-2 snap-x" 
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {gallery.map((img, index) => (
+                <img 
+                  key={index}
+                  src={img} 
+                  onClick={() => setMainImage(img)}
+                  className={`w-20 h-24 shrink-0 object-cover rounded-xl cursor-pointer snap-start transition-all ${mainImage === img ? 'border-2 border-[#b57b77] opacity-100' : 'opacity-60'}`} 
+                  alt={`miniatura ${index + 1}`} 
+                />
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Lado Direito - Informações (45% do espaço) */}
+        {/* Lado Direito - Informações */}
         <div className="w-full md:w-[45%] p-6 md:p-8 flex flex-col">
           <span className="text-xs font-bold tracking-widest text-[#a88a87] uppercase mb-3 bg-[#dfcbc9]/30 w-max px-3 py-1 rounded-full">
             {product.categoria}
@@ -135,7 +152,7 @@ const ProductModal = ({ product, onClose }) => {
             </div>
           )}
 
-          {/* Botões - Margem ajustada para não esticar a tela */}
+          {/* Botões */}
           <div className="mt-4">
             <button 
               onClick={handleWhatsAppClick}

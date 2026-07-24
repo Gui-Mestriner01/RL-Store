@@ -2,11 +2,12 @@ import React from 'react';
 
 const HeroBanner = () => {
   return (
-    // Ajustamos o pt-24 para pt-12 para tirar aquele buraco branco gigante no topo do celular,
-    // mantendo um espaço confortável (pb-24) antes de chegar no botão e na seção de baixo.
     <section id="inicio" className="relative w-full pt-12 pb-24 md:pt-16 md:pb-24 overflow-hidden bg-gradient-to-r from-[#fcfaf9] to-[#f4ebe9]">
       
-      <div className="absolute bottom-0 -right-[15%] md:-right-[5%] lg:right-[-2%] w-[90%] md:w-[65%] lg:w-[55%] z-0 pointer-events-none">
+      {/* 🚀 AQUI ESTÁ A MÁGICA DO MOBILE! */}
+      {/* Aumentamos w-[90%] para w-[140%] e empurramos para -right-[30%] */}
+      {/* Adicionado opacity-80 no mobile (e opacity-100 no PC) para não atrapalhar a leitura */}
+      <div className="absolute bottom-0 -right-[30%] md:-right-[5%] lg:right-[-2%] w-[140%] md:w-[65%] lg:w-[55%] z-0 pointer-events-none opacity-80 md:opacity-100">
         <img 
           src="/arara-roupas.png" 
           alt="Arara de roupas RL Store" 
@@ -18,10 +19,10 @@ const HeroBanner = () => {
         
         <div className="w-full md:w-3/5 flex flex-col items-center md:items-start text-center md:text-left">
           
-          {/* CHARME MOBILE: Esse tracinho aparece só no celular para preencher o vazio deixado pela logo e dar equilíbrio visual */}
+          {/* CHARME MOBILE */}
           <div className="md:hidden w-12 h-1 bg-[#a88a87] mb-6 rounded-full"></div>
 
-          {/* LOGO: Oculta no mobile para não brigar com o cabeçalho, mas visível no PC */}
+          {/* LOGO */}
           <img 
             src="/logo.png" 
             alt="RL Store" 

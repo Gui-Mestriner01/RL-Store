@@ -1,17 +1,15 @@
 import React from 'react';
-// Precisamos importar os ícones do pacote react-icons
 import { FaWhatsapp, FaInstagram } from 'react-icons/fa';
 
 const Footer = () => {
   return (
-    // OLHA O id="contato" AQUI: É para cá que a tela vai descer!
     <footer id="contato" className="bg-[#fcfaf9] border-t border-[#dfcbc9]/40 pt-16 pb-8">
       <div className="max-w-[1200px] mx-auto px-6 md:px-16">
         
         {/* GRID DIVIDIDO EM 3 COLUNAS */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12 border-b border-[#dfcbc9]/60 pb-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 mb-12 border-b border-[#dfcbc9]/60 pb-12">
           
-          {/* Coluna 1: A Marca */}
+          {/* Coluna 1: A Marca (Alinhada à esquerda no PC) */}
           <div className="flex flex-col items-center md:items-start text-center md:text-left">
             <img 
               src="/logo.png" 
@@ -23,19 +21,19 @@ const Footer = () => {
             </p>
           </div>
 
-          {/* Coluna 2: Menu Rápido */}
-          <div className="flex flex-col items-center md:items-start">
+          {/* Coluna 2: Menu Rápido (Centralizado no PC) */}
+          <div className="flex flex-col items-center md:items-center text-center">
               <h4 className="text-[#3d2c2c] font-sans font-bold tracking-widest mb-6 text-sm">MENU RÁPIDO</h4>
-              <nav className="flex flex-col gap-3 text-sm">
+              <nav className="flex flex-col gap-3 text-sm items-center">
                 <a href="#inicio" className="font-sans text-[#5a4a42] hover:text-[#a88a87] transition-colors">Início</a>
                 <a href="#catalogo" className="font-sans text-[#5a4a42] hover:text-[#a88a87] transition-colors">Catálogo</a>
               </nav>
           </div>
 
-          {/* Coluna 3: Contatos Diretos */}
-          <div className="flex flex-col items-center md:items-start text-center md:text-left">
+          {/* Coluna 3: Contatos Diretos (Alinhada à direita no PC) */}
+          <div className="flex flex-col items-center md:items-end text-center md:text-right">
             <h4 className="text-[#3d2c2c] font-sans font-bold tracking-widest mb-6 text-sm">FALE CONOSCO</h4>
-            <div className="flex flex-col gap-4 text-sm text-[#5a4a42]">
+            <div className="flex flex-col gap-4 text-sm text-[#5a4a42] items-center md:items-end">
               
               <a href="https://wa.me/5511972276750" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-[#a88a87] transition-colors group">
                 <span className="p-2 bg-[#f4ebe9] rounded-full group-hover:bg-[#dfcbc9] transition-colors">
