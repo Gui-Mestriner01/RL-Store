@@ -1,45 +1,107 @@
 export const produtosDaLoja = [
   {
     id: 1,
-    nome: "Body Regata Decote Quadrado",
-    preco: "R$ 189,90",
-    categoria: "blusas",
-    descricao: "Peça com caimento perfeito, leve e feminina. Possui detalhes exclusivos para realçar sua beleza com muito conforto e elegância em qualquer ocasião.",
-    
+    nome: "Vestido Longo Com Fenda Suplex",
+    preco: "R$ 94,90",
+    categoria: "vestidos",
+    descricao: "Elegante, confortável e com ótimo caimento. O modelo longo com fenda lateral garante um toque moderno e sofisticado ao look.",
     imagens: [
-      "/roupas/body_regata1.png", 
-      "/roupas/BodyRegataAzul.png",
-      "/roupas/BodyRegataMarrom.png",
-      "/roupas/body_regata2.png",
-      "/roupas/body_regata3.png",
-      "/roupas/body_regata4.png",
-      "/roupas/body_regata5.png"
+      "/roupas/VestidoLongo1.jpeg",
+      "/roupas/VestidoLongo2.jpeg"
     ],
-    
-    tamanhos: ["Tamanho Único (36 ao 44)"],
-    
+    tamanhos: ["Tamanho Único"],
     cores: [
-      { nome: "Preto", hex: "#1a1a1a" },
-      { nome: "Marrom", hex: "#4b2617" },
-      { nome: "Azul Escuro", hex: "#0f0c3a" }
+      { nome: "Preto", hex: "#000000" }
     ],
-    
     novoLançamento: true
   },
-
   {
     id: 2,
-    nome: "Vestido Midi Floral",
-    preco: "R$ 229,90",
-    categoria: "vestidos",
-    descricao: "Vestido leve para o verão, estampa exclusiva RL Store.",
+    nome: "Bata Frente Única Assimétrica",
+    preco: "R$ 59,90",
+    categoria: "blusas",
+    descricao: "Leve, elegante e moderna, com modelagem assimétrica e caimento fluido. Perfeita para compor looks estilosos e versáteis.",
     imagens: [
-      "/roupas/vestido-floral-1.jpg" // Se tiver uma foto só, não tem problema
+      "/roupas/Bata1.jpg",
+      "/roupas/Bata2.jpg",
+      "/roupas/Bata3.jpg",
+      "/roupas/Bata4.jpg"
     ],
-    tamanhos: ["M", "G"], // Essa peça só tem M e G, por exemplo
+    tamanhos: ["Tamanho Único"], 
     cores: [
-      { nome: "Estampado", hex: "#e0aca3" }
+      { nome: "Preto", hex: "#000000" },
+      { nome: "Marrom", hex: "#6F3826" }
+    ],
+    novoLançamento: true
+  },
+  {
+    id: 3,
+    nome: "Body Manga Longa",
+    preco: "R$ 50,00",
+    categoria: "blusas",
+    descricao: "Modelo confortável e elegante, com manga longa e design moderno. Perfeito para compor looks casuais e estilizados.",
+    
+    aviso: "Atenção: A saia apresentada nas fotos é vendida separadamente.",
+    
+    imagens: [
+      "/roupas/BodyMangaLonga1.jpg",
+      "/roupas/BodyMangaLonga2.jpg"
+    ],
+    tamanhos: ["Tamanho Único"],
+    cores: [
+      { nome: "Marrom", hex: "#6F3826" }
+    ],
+    novoLançamento: true
+  },
+  {
+    id: 4,
+    nome: "Saia Isis",
+    preco: "R$ 59,90",
+    categoria: "saias",
+    descricao: "Saia curta com detalhe assimétrico/cauda lateral, que dá um movimento diferenciado à peça.",
+    imagens: [
+      "/roupas/SaiaIsis4.jpg",
+      "/roupas/SaiaIsis3.jpg",
+      "/roupas/SaiaIsis2.jpg",
+      "/roupas/SaiaIsis1.jpg",
+    ],
+    tamanhos: ["Tamanho Único"],
+    cores: [
+      { nome: "Preto", hex: "#000000" },
+      { nome: "Marrom", hex: "#6F3826" }
     ],
     novoLançamento: false
+  },
+  {
+    id: 5,
+    nome: "Vestido Curto de Gola Alta e Manga Longa",
+    preco: "R$ 84,90",
+    categoria: "vestidos",
+    descricao: "Vestido curto com gola alta e mangas longas, ideal para ocasiões especiais ou para um look elegante no dia a dia.",
+    imagens: [
+      "/roupas/Vestido1.jpg",
+      "/roupas/Vestido2.jpg",
+    ],
+    tamanhos: ["Tamanho Único"],
+    cores: [
+      { nome: "Marrom", hex: "#6F3826" }
+    ],
+    novoLançamento: false
+  },
+  {
+    id: 6,
+    nome: "Saia Alfaiataria",
+    preco: "R$ 74,90",
+    categoria: "saias",
+    descricao: "Saia alfaiataria com corte clássico e detalhes elegantes, perfeita para compor looks sofisticados.",
+    imagens: [
+      "/roupas/SaiaAlfaiataria.jpg",
+      "/roupas/SaiaAlfaiataria2.jpg"
+    ],
+    tamanhos: ["Tamanho Único"],
+    cores: [
+      { nome: "Branco", hex: "#fefafa" },
+    ],
+    novoLançamento: true
   }
 ];

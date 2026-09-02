@@ -9,7 +9,6 @@ const ProductGrid = ({ activeCategory = 'TODOS' }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
 
   // 2. O Cérebro do Filtro: 
-  // Se for 'TODOS', mostra a loja inteira. Se não, filtra só a categoria clicada!
   const roupasFiltradas = activeCategory === 'TODOS' 
     ? produtosDaLoja 
     : produtosDaLoja.filter(product => 

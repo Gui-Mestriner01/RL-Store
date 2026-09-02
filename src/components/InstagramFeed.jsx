@@ -3,10 +3,10 @@ import { FaInstagram } from 'react-icons/fa';
 
 const InstagramFeed = () => {
   const instaPhotos = [
-    "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=300&q=80",
-    "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=300&q=80",
-    "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=300&q=80",
-    "https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=300&q=80"
+    "/roupas/insta1.jpg",
+    "/roupas/insta2.jpg",
+    "/roupas/insta3.jpg",
+    "/roupas/insta4.jpg",
   ];
 
   return (

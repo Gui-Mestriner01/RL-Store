@@ -2,7 +2,8 @@ import React from 'react';
 
 // Agora o componente recebe o estado (activeCategory) e a função de clique (setActiveCategory)
 const CategoryFilter = ({ activeCategory, setActiveCategory }) => {
-  const categories = ['TODOS', 'VESTIDOS', 'BLUSAS', 'CALÇAS', 'CONJUNTOS', 'OUTROS'];
+  // 👇 LISTA ATUALIZADA COM AS NOVAS CATEGORIAS
+  const categories = ['TODOS', 'VESTIDOS', 'BLUSAS', 'SAIAS', 'OUTROS'];
 
   return (
     <section id="catalogo" className="py-10 px-4 max-w-4xl mx-auto flex flex-col items-center animate-fade-in">
@@ -16,7 +17,7 @@ const CategoryFilter = ({ activeCategory, setActiveCategory }) => {
         {categories.map((category) => (
           <button
             key={category}
-            onClick={() => setActiveCategory(category)} // Adicionamos o clique aqui!
+            onClick={() => setActiveCategory(category)}
             className={`px-5 md:px-6 py-2 md:py-2.5 rounded-full text-xs md:text-sm font-bold tracking-wider uppercase transition-all duration-300 ${
               activeCategory === category
                 ? 'bg-[#a88a87] text-white shadow-md scale-105'

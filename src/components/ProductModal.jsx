@@ -8,17 +8,13 @@ const ProductModal = ({ product, onClose }) => {
 
   useEffect(() => {
     if (product) {
-      if (product.imagens && product.imagens.length > 0) setMainImage(product.imagens[0]);
-      if (product.tamanhos && product.tamanhos.length > 0) setSelectedSize(product.tamanhos[0]);
-      if (product.cores && product.cores.length > 0) setSelectedColor(product.cores[0].nome);
+      if (product.imagens?.length > 0) setMainImage(product.imagens[0]);
+      if (product.tamanhos?.length > 0) setSelectedSize(product.tamanhos[0]);
+      if (product.cores?.length > 0) setSelectedColor(product.cores[0].nome);
     }
   }, [product]);
 
   if (!product) return null;
-
-  const availableColors = product.cores || [];
-  const availableSizes = product.tamanhos || [];
-  const gallery = product.imagens || [];
 
   const handleWhatsAppClick = () => {
     const phoneNumber = "5511972276750"; 
@@ -41,16 +37,13 @@ const ProductModal = ({ product, onClose }) => {
           <FaTimes />
         </button>
 
-        {/* Lado Esquerdo - Galeria Mista (Vertical no PC, Horizontal no Celular) */}
+        {/* Lado Esquerdo - Galeria Mista */}
         <div className="w-full md:w-[55%] p-5 md:p-8 flex flex-col md:flex-row gap-4 md:gap-5 bg-white">
           
-          {/* 1. MINIATURAS PC (Vertical, escondido no celular) */}
-          {gallery.length > 1 && (
-            <div 
-              className="hidden md:flex flex-col gap-3 w-20 md:w-24 shrink-0 overflow-y-auto max-h-[600px]" 
-              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-            >
-              {gallery.map((img, index) => (
+          {/* 1. MINIATURAS PC (Vertical) */}
+          {product.imagens?.length > 1 && (
+            <div className="hidden md:flex flex-col gap-3 w-20 md:w-24 shrink-0 overflow-y-auto max-h-[600px] [scrollbar-width:none] [-ms-overflow-style:none]">
+              {product.imagens.map((img, index) => (
                 <img 
                   key={index}
                   src={img} 
@@ -71,13 +64,10 @@ const ProductModal = ({ product, onClose }) => {
             )}
           </div>
 
-          {/* 2. MINIATURAS CELULAR (Horizontal, arrastável, escondido no PC) */}
-          {gallery.length > 1 && (
-            <div 
-              className="flex md:hidden w-full overflow-x-auto gap-3 pb-2 snap-x" 
-              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-            >
-              {gallery.map((img, index) => (
+          {/* 2. MINIATURAS CELULAR (Horizontal) */}
+          {product.imagens?.length > 1 && (
+            <div className="flex md:hidden w-full overflow-x-auto gap-3 pb-2 snap-x [scrollbar-width:none] [-ms-overflow-style:none]">
+              {product.imagens.map((img, index) => (
                 <img 
                   key={index}
                   src={img} 
@@ -99,12 +89,22 @@ const ProductModal = ({ product, onClose }) => {
           <h2 className="text-3xl md:text-4xl font-serif text-[#3d2c2c] mb-3 leading-tight">{product.nome}</h2>
           <p className="text-2xl font-bold text-[#9c6662] mb-6">{product.preco}</p>
           
-          <p className="text-[#5a4a42] text-sm mb-8 leading-relaxed">
+          <p className="text-[#5a4a42] text-sm mb-6 leading-relaxed">
             {product.descricao}
           </p>
 
+          {/* CAIXA DE AVISO OPICIONAL */}
+          {product.aviso && (
+            <div className="mb-6 bg-[#f4ebe9] border-l-4 border-[#a88a87] p-3 rounded-r-lg shadow-sm">
+              <p className="text-xs md:text-sm text-[#9c6662] italic font-medium flex items-start gap-2">
+                <span className="text-lg leading-none">✨</span>
+                {product.aviso}
+              </p>
+            </div>
+          )}
+
           {/* Seletor de Tamanhos */}
-          {availableSizes.length > 0 && (
+          {product.tamanhos?.length > 0 && (
             <div className="mb-6">
               <div className="flex justify-between items-center mb-3">
                 <span className="text-sm font-bold text-[#3d2c2c]">Tamanhos disponíveis</span>
@@ -113,7 +113,7 @@ const ProductModal = ({ product, onClose }) => {
                 </button>
               </div>
               <div className="flex gap-3 flex-wrap">
-                {availableSizes.map(size => (
+                {product.tamanhos.map(size => (
                   <button 
                     key={size} 
                     onClick={() => setSelectedSize(size)}
@@ -131,13 +131,13 @@ const ProductModal = ({ product, onClose }) => {
           )}
 
           {/* Seletor de Cores */}
-          {availableColors.length > 0 && (
+          {product.cores?.length > 0 && (
             <div className="mb-8">
               <span className="text-sm font-bold text-[#3d2c2c] block mb-3">
                 Cores: <span className="font-normal text-[#5a4a42] ml-1">{selectedColor}</span>
               </span>
               <div className="flex gap-3">
-                {availableColors.map(color => (
+                {product.cores.map(color => (
                   <button
                     key={color.nome}
                     onClick={() => setSelectedColor(color.nome)}
@@ -153,7 +153,7 @@ const ProductModal = ({ product, onClose }) => {
           )}
 
           {/* Botões */}
-          <div className="mt-4">
+          <div className="mt-auto pt-4">
             <button 
               onClick={handleWhatsAppClick}
               className="w-full py-4 bg-[#b57b77] text-white rounded-xl font-bold tracking-wider hover:bg-[#9c6662] transition-colors shadow-lg flex items-center justify-center gap-3 text-lg"
