@@ -1,84 +1,181 @@
-import React, { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { FaWhatsapp, FaArrowUp } from 'react-icons/fa';
+
 import Header from './components/Header';
+import BarraProgresso from './components/BarraProgresso';
 import HeroBanner from './components/HeroBanner';
+import Destaques from './components/Destaques';
 import CategoryFilter from './components/CategoryFilter';
 import ProductGrid from './components/ProductGrid';
+import ProductModal from './components/ProductModal';
 import BenefitsBar from './components/BenefitsBar';
+import ComoFunciona from './components/ComoFunciona';
 import InstagramFeed from './components/InstagramFeed';
+import FaixaCTA from './components/FaixaCTA';
 import Footer from './components/Footer';
-import BottomNav from './components/BottomNav'; 
-import Favoritos from './components/Favoritos';
+import BottomNav from './components/BottomNav';
+import SacolaDrawer from './components/SacolaDrawer';
+import FavoritosDrawer from './components/FavoritosDrawer';
+
+import { useStore } from './store/StoreContext';
+import { useRevelar } from './hooks/useHashRoute';
+
+const POR_PAGINA = 8;
+
+const normalizar = (t = '') =>
+  t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
 function App() {
-  const [activeTab, setActiveTab] = useState('home');
-  // 1. Criamos um "controle remoto" para abrir e fechar a janela de favoritos no PC
-  const [showFavoritesModal, setShowFavoritesModal] = useState(false);
-  
-  // 2. Criamos o "controle remoto" do filtro de categorias (começa sempre mostrando 'TODOS')
-  const [selectedCategory, setSelectedCategory] = useState('TODOS');
+  const { produtosVisiveis, config } = useStore();
+
+  const [busca, setBusca] = useState('');
+  const [categoria, setCategoria] = useState('Todos');
+  const [ordenacao, setOrdenacao] = useState('destaque');
+  const [visiveis, setVisiveis] = useState(POR_PAGINA);
+  const [produtoAberto, setProdutoAberto] = useState(null);
+  const [sacolaAberta, setSacolaAberta] = useState(false);
+  const [favoritosAbertos, setFavoritosAbertos] = useState(false);
+
+  useRevelar();
+
+  const filtrados = useMemo(() => {
+    const termo = normalizar(busca.trim());
+
+    const lista = produtosVisiveis.filter((p) => {
+      const baterCategoria =
+        categoria === 'Todos' || normalizar(p.categoria) === normalizar(categoria);
+
+      if (!baterCategoria) return false;
+      if (!termo) return true;
+
+      const alvo = normalizar(
+        [p.nome, p.categoria, p.descricao, ...p.cores.map((c) => c.nome)].join(' ')
+      );
+      return alvo.includes(termo);
+    });
+
+    const ordenadores = {
+      destaque: (a, b) =>
+        Number(a.esgotado) - Number(b.esgotado) ||
+        Number(b.destaque) - Number(a.destaque) ||
+        Number(b.novoLancamento) - Number(a.novoLancamento),
+      recentes: (a, b) =>
+        Number(b.novoLancamento) - Number(a.novoLancamento) ||
+        String(b.criadoEm).localeCompare(String(a.criadoEm)),
+      menor: (a, b) => a.preco - b.preco,
+      maior: (a, b) => b.preco - a.preco,
+      az: (a, b) => a.nome.localeCompare(b.nome, 'pt-BR'),
+    };
+
+    return [...lista].sort(ordenadores[ordenacao] || ordenadores.destaque);
+  }, [produtosVisiveis, busca, categoria, ordenacao]);
+
+  const mostrar = filtrados.slice(0, visiveis);
+
+  const limparFiltros = () => {
+    setBusca('');
+    setCategoria('Todos');
+    setVisiveis(POR_PAGINA);
+  };
+
+  const aoTrocarCategoria = (nova) => {
+    setCategoria(nova);
+    setVisiveis(POR_PAGINA);
+  };
 
   return (
-    <div className="min-h-screen bg-[#f3eae8] font-sans text-[#4a3b32] pb-20 md:pb-0 relative">
-      
-      <div className="bg-gradient-to-b from-[#dfcbc9] to-[#f3eae8]">
-        <Header onOpenFavorites={() => setShowFavoritesModal(true)} />
-        
-        <div className={`${activeTab === 'home' ? 'block' : 'hidden'} md:block`}>
-          <HeroBanner />
-        </div>
-      </div>
+    <div className="min-h-screen bg-sand text-body pb-20 md:pb-0">
+      <BarraProgresso />
 
-      {/* Entregamos o controle remoto da categoria para o Filtro e para a Grade de Roupas */}
-      <div className={`${(activeTab === 'home' || activeTab === 'catalog') ? 'block' : 'hidden'} md:block`}>
-        <CategoryFilter activeCategory={selectedCategory} setActiveCategory={setSelectedCategory} />
-        <ProductGrid activeCategory={selectedCategory} />
-      </div>
+      <Header
+        busca={busca}
+        setBusca={(v) => {
+          setBusca(v);
+          setVisiveis(POR_PAGINA);
+        }}
+        onAbrirFavoritos={() => setFavoritosAbertos(true)}
+        onAbrirSacola={() => setSacolaAberta(true)}
+      />
 
-      {/* FAVORITOS NO CELULAR: Continua igual, aparecendo como uma aba */}
-      {activeTab === 'favorites' && (
-        <div className="md:hidden animate-fade-in">
-          <Favoritos />
-        </div>
-      )}
+      <HeroBanner />
 
-      {/* FAVORITOS NO COMPUTADOR: Agora é um Pop-up / Modal lindão! */}
-      {showFavoritesModal && (
-        <div className="hidden md:flex fixed inset-0 z-[100] bg-[#3d2c2c]/60 backdrop-blur-sm items-center justify-center p-6 animate-fade-in">
-          
-          {/* Caixa Branca do Modal */}
-          <div className="bg-[#f3eae8] w-full max-w-5xl max-h-[90vh] rounded-3xl overflow-y-auto relative shadow-2xl border border-[#dfcbc9]/50">
-            
-            {/* Botão de Fechar */}
-            <button 
-              onClick={() => setShowFavoritesModal(false)}
-              className="absolute top-6 right-6 w-12 h-12 flex items-center justify-center bg-white rounded-full text-[#3d2c2c] shadow-md hover:bg-[#dfcbc9] hover:text-white transition-all z-50 text-xl font-bold"
-            >
-              ✕
-            </button>
-            
-            {/* Colocamos o mesmo componente Favoritos aqui dentro! */}
-            <div className="pt-2 pb-8">
-              <Favoritos />
+      <Destaques onSelecionar={setProdutoAberto} />
+
+      <main id="catalogo" className="px-5 md:px-8 max-w-[1280px] mx-auto">
+        <CategoryFilter
+          categoriaAtiva={categoria}
+          setCategoriaAtiva={aoTrocarCategoria}
+          ordenacao={ordenacao}
+          setOrdenacao={setOrdenacao}
+          total={filtrados.length}
+          busca={busca}
+        />
+
+        <div className="pb-20">
+          <ProductGrid
+            produtos={mostrar}
+            onSelecionar={setProdutoAberto}
+            aoLimpar={limparFiltros}
+          />
+
+          {visiveis < filtrados.length && (
+            <div className="flex flex-col items-center gap-4 mt-16">
+              <div className="h-px w-full max-w-xs bg-line" />
+              <button
+                onClick={() => setVisiveis((v) => v + POR_PAGINA)}
+                className="px-10 py-4 bg-cream border border-line text-ink rounded-full text-[10px] font-bold tracking-[0.18em] uppercase hover:bg-ink hover:text-cream hover:border-ink transition-all sombra-suave"
+              >
+                Ver mais peças ({filtrados.length - visiveis})
+              </button>
             </div>
-
-          </div>
-          
+          )}
         </div>
+      </main>
+
+      <BenefitsBar />
+      <ComoFunciona />
+      <InstagramFeed />
+      <FaixaCTA />
+      <Footer />
+
+      <BottomNav
+        onAbrirFavoritos={() => setFavoritosAbertos(true)}
+        onAbrirSacola={() => setSacolaAberta(true)}
+      />
+
+      {/* Botões flutuantes (desktop) */}
+      <div className="hidden md:flex flex-col gap-3 fixed bottom-8 right-8 z-[70]">
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          aria-label="Voltar ao topo"
+          className="w-11 h-11 rounded-full bg-cream border border-line text-ink flex items-center justify-center sombra-alta hover:bg-ink hover:text-cream transition-all"
+        >
+          <FaArrowUp className="text-xs" />
+        </button>
+        <a
+          href={`https://wa.me/${config.whatsapp}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Falar no WhatsApp"
+          className="w-14 h-14 rounded-full bg-[#25D366] text-white flex items-center justify-center sombra-flutuante hover:scale-105 transition-transform"
+        >
+          <FaWhatsapp className="text-2xl" />
+        </a>
+      </div>
+
+      {produtoAberto && (
+        <ProductModal
+          key={produtoAberto.id}
+          product={produtoAberto}
+          onClose={() => setProdutoAberto(null)}
+        />
       )}
-      
-      <div className={`${activeTab === 'home' ? 'block' : 'hidden'} md:block`}>
-        <BenefitsBar />
-        <InstagramFeed />
-      </div>
-      
-       
-      {/* Ajuste: O rodapé agora também aparece na aba de Favoritos no celular */}
-      <div className={`${(activeTab === 'home' || activeTab === 'favorites') ? 'block' : 'hidden'} md:block pb-24 md:pb-0`}>
-        <Footer />
-      </div>
-      
-      <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
-      
+      <SacolaDrawer aberto={sacolaAberta} onClose={() => setSacolaAberta(false)} />
+      <FavoritosDrawer
+        aberto={favoritosAbertos}
+        onClose={() => setFavoritosAbertos(false)}
+        onAbrirProduto={setProdutoAberto}
+      />
     </div>
   );
 }

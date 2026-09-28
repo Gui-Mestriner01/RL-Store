@@ -1,64 +1,38 @@
-import React, { useState } from 'react'; 
+import { FaSearch } from 'react-icons/fa';
 import ProductCard from './ProductCard';
-import ProductModal from './ProductModal'; 
 
-import { produtosDaLoja } from '../produtos';
-
-// 1. O componente agora recebe a categoria que o botão mandou (activeCategory)
-const ProductGrid = ({ activeCategory = 'TODOS' }) => {
-  const [selectedProduct, setSelectedProduct] = useState(null);
-
-  // 2. O Cérebro do Filtro: 
-  const roupasFiltradas = activeCategory === 'TODOS' 
-    ? produtosDaLoja 
-    : produtosDaLoja.filter(product => 
-        // Convertendo tudo para minúsculo para garantir que "BLUSAS" ache "blusas"
-        product.categoria?.toLowerCase() === activeCategory.toLowerCase()
-      );
+const ProductGrid = ({ produtos, onSelecionar, aoLimpar }) => {
+  if (!produtos.length) {
+    return (
+      <div className="flex flex-col items-center justify-center text-center py-24 gap-4 animate-fade-in">
+        <div className="w-16 h-16 rounded-full bg-cream border border-line flex items-center justify-center text-rose text-xl mb-1">
+          <FaSearch />
+        </div>
+        <h3 className="text-ink font-display text-2xl">Nada por aqui ainda</h3>
+        <p className="text-body text-sm max-w-sm leading-relaxed text-pretty">
+          Não encontramos peças com esses filtros. Tente outra categoria ou fale
+          com a gente no WhatsApp — pode ser que tenhamos algo reservado.
+        </p>
+        <button
+          onClick={aoLimpar}
+          className="mt-2 px-8 py-3.5 rounded-full border border-line bg-cream text-ink text-[10px] font-bold tracking-[0.18em] uppercase hover:bg-ink hover:text-cream hover:border-ink transition-all"
+        >
+          Limpar filtros
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <section id="catalogo" className="px-8 md:px-16 py-12 max-w-[1200px] mx-auto">
-      
-      {/* 3. Se tiver roupas nessa categoria, desenha a grade normalmente */}
-      {roupasFiltradas.length > 0 ? (
-        <div className="flex flex-wrap justify-center gap-8 md:gap-12">
-          {roupasFiltradas.map((product) => (
-            <div key={product.id} className="w-full max-w-[260px]">
-              <ProductCard 
-                product={product} 
-                onClick={() => setSelectedProduct(product)} 
-              />
-            </div>
-          ))}
-        </div>
-      ) : (
-        // MENSAGEM ELEGANTE SE A CATEGORIA ESTIVER VAZIA:
-        <div className="flex flex-col items-center justify-center text-center py-20 gap-4 animate-fade-in">
-          <div className="text-5xl text-[#dfcbc9] mb-2">✧</div>
-          <h3 className="text-[#3d2c2c] font-sans font-semibold text-lg">Novidades em breve!</h3>
-          <p className="text-[#5a4a42] font-sans text-sm max-w-sm px-4">
-            Ainda estamos separando peças exclusivas para esta categoria. Fique de olho!
-          </p>
-        </div>
-      )}
-      
-      {/* O botão "Ver mais" só aparece se tiver peças na tela */}
-      {roupasFiltradas.length > 0 && (
-        <div className="flex justify-center mt-16">
-          <button className="px-8 py-3 bg-[#a88a87] text-white rounded-full font-bold tracking-wide hover:bg-[#9c6662] transition-colors shadow-md font-sans">
-            VER MAIS PRODUTOS
-          </button>
-        </div>
-      )}
-
-      {selectedProduct && (
-        <ProductModal 
-          product={selectedProduct} 
-          onClose={() => setSelectedProduct(null)} 
+    <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-4 gap-y-10 md:gap-x-6 md:gap-y-14">
+      {produtos.map((produto) => (
+        <ProductCard
+          key={produto.id}
+          product={produto}
+          onClick={() => onSelecionar(produto)}
         />
-      )}
-
-    </section>
+      ))}
+    </div>
   );
 };
 

@@ -1,44 +1,43 @@
-import React from 'react';
-import { FaHome, FaThLarge, FaHeart, FaWhatsapp } from 'react-icons/fa';
+import { FaHome, FaThLarge, FaHeart, FaShoppingBag } from 'react-icons/fa';
+import { useStore } from '../store/StoreContext';
 
-const BottomNav = ({ activeTab, setActiveTab }) => {
+const rolarPara = (id) =>
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+
+const ItemNav = ({ icone, rotulo, onClick, badge = 0 }) => (
+  <button
+    onClick={onClick}
+    className="relative flex flex-col items-center gap-1 text-body hover:text-ink transition-colors px-3 py-1"
+  >
+    <span className="text-lg">{icone}</span>
+    <span className="text-[10px] uppercase tracking-[0.1em]">{rotulo}</span>
+    {badge > 0 && (
+      <span className="absolute top-0 right-1 bg-rose text-white text-[9px] font-bold min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center">
+        {badge}
+      </span>
+    )}
+  </button>
+);
+
+const BottomNav = ({ onAbrirFavoritos, onAbrirSacola }) => {
+  const { favoritos, qtdSacola } = useStore();
+
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-[#dfcbc9] z-50 md:hidden flex justify-around items-center py-3 px-2 shadow-2xl">
-      
-      <button 
-        onClick={() => setActiveTab('home')}
-        className={`flex flex-col items-center gap-1 transition-colors ${activeTab === 'home' ? 'text-[#3d2c2c] font-bold' : 'text-[#8c736e]'}`}
-      >
-        <FaHome className="text-xl" />
-        <span className="text-[10px] uppercase tracking-wider">Início</span>
-      </button>
-
-      <button 
-        onClick={() => setActiveTab('catalog')}
-        className={`flex flex-col items-center gap-1 transition-colors ${activeTab === 'catalog' ? 'text-[#3d2c2c] font-bold' : 'text-[#8c736e]'}`}
-      >
-        <FaThLarge className="text-xl" />
-        <span className="text-[10px] uppercase tracking-wider">Catálogo</span>
-      </button>
-
-      <button 
-        onClick={() => setActiveTab('favorites')}
-        className={`flex flex-col items-center gap-1 transition-colors ${activeTab === 'favorites' ? 'text-[#3d2c2c] font-bold' : 'text-[#8c736e]'}`}
-      >
-        <FaHeart className="text-xl" />
-        <span className="text-[10px] uppercase tracking-wider">Favoritos</span>
-      </button>
-
-      <a 
-        href="https://wa.me/5511999999999" 
-        target="_blank" 
-        rel="noreferrer"
-        className="flex flex-col items-center gap-1 text-[#25D366] font-medium"
-      >
-        <FaWhatsapp className="text-xl" />
-        <span className="text-[10px] uppercase tracking-wider">WhatsApp</span>
-      </a>
-
+    <nav className="fixed bottom-0 left-0 right-0 glass border-t border-line z-[60] md:hidden flex justify-around items-center py-2.5 px-2 shadow-[0_-4px_24px_rgba(46,33,29,.08)]">
+      <ItemNav icone={<FaHome />} rotulo="Início" onClick={() => rolarPara('inicio')} />
+      <ItemNav icone={<FaThLarge />} rotulo="Catálogo" onClick={() => rolarPara('catalogo')} />
+      <ItemNav
+        icone={<FaHeart />}
+        rotulo="Favoritos"
+        onClick={onAbrirFavoritos}
+        badge={favoritos.length}
+      />
+      <ItemNav
+        icone={<FaShoppingBag />}
+        rotulo="Sacola"
+        onClick={onAbrirSacola}
+        badge={qtdSacola}
+      />
     </nav>
   );
 };

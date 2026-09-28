@@ -1,54 +1,64 @@
-import React from 'react';
 import { FaInstagram } from 'react-icons/fa';
+import { useStore } from '../store/StoreContext';
+import { midia } from '../lib/utils';
 
 const InstagramFeed = () => {
-  const instaPhotos = [
-    "/roupas/insta1.jpg",
-    "/roupas/insta2.jpg",
-    "/roupas/insta3.jpg",
-    "/roupas/insta4.jpg",
-  ];
+  const { config } = useStore();
+  const link = `https://www.instagram.com/${config.instagram}/`;
+  const fotos = config.fotosInstagram || [];
 
   return (
-    <section className="px-8 md:px-16 py-16 max-w-[1400px] mx-auto">
-      <div className="bg-[#dfcbc9]/40 rounded-[2rem] p-8 md:p-12 flex flex-col lg:flex-row items-center justify-between gap-10 shadow-sm border border-[#dfcbc9]/60">
-        
-        {/* Chamada para Ação */}
+    <section className="px-5 md:px-16 py-20 max-w-[1400px] mx-auto">
+      <div
+        data-revelar
+        className="bg-gradient-to-br from-blush/60 to-sand rounded-[2rem] p-8 md:p-12 flex flex-col lg:flex-row items-center justify-between gap-10 border border-line"
+      >
         <div className="flex items-center gap-6 lg:w-1/3 w-full">
-          <a 
-            href="https://www.instagram.com/rl.modastore/" 
-            target="_blank" 
+          <a
+            href={link}
+            target="_blank"
             rel="noreferrer"
-            className="text-6xl text-[#a88a87] p-4 bg-white rounded-full shadow-sm hover:scale-105 transition-transform"
+            className="text-4xl text-rose p-5 bg-cream rounded-full shadow-sm hover:scale-105 hover:text-rosedark transition-all shrink-0"
           >
             <FaInstagram />
           </a>
           <div>
-            <h3 className="text-2xl font-serif text-[#3d2c2c] mb-1">Siga nosso Instagram</h3>
-            <a 
-              href="https://www.instagram.com/rl.modastore/" 
-              target="_blank" 
+            <h3 className="text-2xl font-display text-ink mb-1">Siga o nosso dia a dia</h3>
+            <a
+              href={link}
+              target="_blank"
               rel="noreferrer"
-              className="text-[#9c6662] font-medium text-sm mb-2 hover:underline"
+              className="text-rosedark font-medium text-sm hover:underline"
             >
-              @rl.modastore
+              @{config.instagram}
             </a>
-            <p className="text-[#5a4a42] text-sm mt-1">Novidades, inspirações e promoções exclusivas todos os dias!</p>
+            <p className="text-body text-sm mt-2 leading-relaxed">
+              Novidades, provador e promoções que saem primeiro por lá.
+            </p>
           </div>
         </div>
 
-        {/* Grade de Fotos Atualizada - Sem barra de rolagem e fotos 100% quadradas */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 lg:w-2/3 w-full">
-          {instaPhotos.map((photo, index) => (
-            <img 
-              key={index} 
-              src={photo} 
-              alt={`Instagram post ${index + 1}`} 
-              className="w-full aspect-square object-cover rounded-2xl shadow-md hover:scale-105 transition-transform duration-300 cursor-pointer" 
-            />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 lg:w-2/3 w-full">
+          {fotos.map((foto, i) => (
+            <a
+              key={i}
+              href={link}
+              target="_blank"
+              rel="noreferrer"
+              className="relative group overflow-hidden rounded-2xl"
+            >
+              <img
+                src={midia(foto)}
+                alt={`Publicação ${i + 1} do Instagram`}
+                loading="lazy"
+                className="w-full aspect-square object-cover transition-transform duration-500 group-hover:scale-110"
+              />
+              <span className="absolute inset-0 bg-ink/0 group-hover:bg-ink/35 flex items-center justify-center text-cream opacity-0 group-hover:opacity-100 transition-all">
+                <FaInstagram className="text-2xl" />
+              </span>
+            </a>
           ))}
         </div>
-        
       </div>
     </section>
   );

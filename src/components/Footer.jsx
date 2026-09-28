@@ -1,65 +1,131 @@
-import React from 'react';
-import { FaWhatsapp, FaInstagram } from 'react-icons/fa';
+import { FaWhatsapp, FaInstagram, FaLock, FaArrowUp } from 'react-icons/fa';
+import { midia } from '../lib/utils';
+import { useStore } from '../store/StoreContext';
+
+const formatarTelefone = (numero = '') => {
+  const d = numero.replace(/\D/g, '').replace(/^55/, '');
+  if (d.length < 10) return numero;
+  return `(${d.slice(0, 2)}) ${d.slice(2, -4)}-${d.slice(-4)}`;
+};
 
 const Footer = () => {
+  const { config, produtosVisiveis } = useStore();
+
+  const irPara = (id) =>
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+
   return (
-    <footer id="contato" className="bg-[#fcfaf9] border-t border-[#dfcbc9]/40 pt-16 pb-8">
-      <div className="max-w-[1200px] mx-auto px-6 md:px-16">
-        
-        {/* GRID DIVIDIDO EM 3 COLUNAS */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 mb-12 border-b border-[#dfcbc9]/60 pb-12">
-          
-          {/* Coluna 1: A Marca (Alinhada à esquerda no PC) */}
-          <div className="flex flex-col items-center md:items-start text-center md:text-left">
-            <img 
-              src="/logo.png" 
-              alt="RL Store" 
-              className="h-20 mb-4 object-contain" 
-            />
-            <p className="text-[#5a4a42] text-sm leading-relaxed max-w-xs font-sans">
-              Estilo que te representa. Peças selecionadas a dedo para realçar a sua beleza e confiança todos os dias.
+    <footer id="contato" className="grao bg-cream border-t border-line pt-16 pb-8">
+      <div className="max-w-[1280px] mx-auto px-6 md:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-8 pb-12 border-b border-line">
+          {/* marca */}
+          <div className="md:col-span-5 flex flex-col items-center md:items-start text-center md:text-left">
+            <img src={midia("logo.png")} alt={config.nomeLoja} className="h-20 mb-5 object-contain" />
+            <p className="text-body text-sm leading-relaxed max-w-xs text-pretty mb-6">
+              {config.subtitulo}
             </p>
-          </div>
-
-          {/* Coluna 2: Menu Rápido (Centralizado no PC) */}
-          <div className="flex flex-col items-center md:items-center text-center">
-              <h4 className="text-[#3d2c2c] font-sans font-bold tracking-widest mb-6 text-sm">MENU RÁPIDO</h4>
-              <nav className="flex flex-col gap-3 text-sm items-center">
-                <a href="#inicio" className="font-sans text-[#5a4a42] hover:text-[#a88a87] transition-colors">Início</a>
-                <a href="#catalogo" className="font-sans text-[#5a4a42] hover:text-[#a88a87] transition-colors">Catálogo</a>
-              </nav>
-          </div>
-
-          {/* Coluna 3: Contatos Diretos (Alinhada à direita no PC) */}
-          <div className="flex flex-col items-center md:items-end text-center md:text-right">
-            <h4 className="text-[#3d2c2c] font-sans font-bold tracking-widest mb-6 text-sm">FALE CONOSCO</h4>
-            <div className="flex flex-col gap-4 text-sm text-[#5a4a42] items-center md:items-end">
-              
-              <a href="https://wa.me/5511972276750" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-[#a88a87] transition-colors group">
-                <span className="p-2 bg-[#f4ebe9] rounded-full group-hover:bg-[#dfcbc9] transition-colors">
-                  <FaWhatsapp className="text-lg text-[#3d2c2c]" />
-                </span>
-                <span className="font-sans font-medium">(11) 97227-6750</span>
+            <div className="flex gap-2.5">
+              <a
+                href={`https://wa.me/${config.whatsapp}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="WhatsApp"
+                className="w-10 h-10 rounded-full bg-sand border border-line flex items-center justify-center text-ink hover:bg-ink hover:text-cream transition-colors"
+              >
+                <FaWhatsapp />
               </a>
-              
-              <a href="https://www.instagram.com/rl.modastore/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-[#a88a87] transition-colors group">
-                <span className="p-2 bg-[#f4ebe9] rounded-full group-hover:bg-[#dfcbc9] transition-colors">
-                  <FaInstagram className="text-lg text-[#3d2c2c]" />
-                </span>
-                <span className="font-sans font-medium">@rl.modastore</span>
+              <a
+                href={`https://www.instagram.com/${config.instagram}/`}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                className="w-10 h-10 rounded-full bg-sand border border-line flex items-center justify-center text-ink hover:bg-ink hover:text-cream transition-colors"
+              >
+                <FaInstagram />
               </a>
-
             </div>
           </div>
 
+          {/* menu */}
+          <div className="md:col-span-3 flex flex-col items-center md:items-start text-center md:text-left">
+            <h4 className="eyebrow text-ink mb-5">Navegue</h4>
+            <nav className="flex flex-col gap-3 text-sm">
+              {[
+                { id: 'inicio', rotulo: 'Início' },
+                { id: 'catalogo', rotulo: 'Catálogo' },
+                { id: 'como-funciona', rotulo: 'Como funciona' },
+              ].map((link) => (
+                <button
+                  key={link.id}
+                  onClick={() => irPara(link.id)}
+                  className="text-body hover:text-rose transition-colors text-left"
+                >
+                  {link.rotulo}
+                </button>
+              ))}
+              <span className="text-muted text-xs mt-1">
+                {produtosVisiveis.length} peças disponíveis agora
+              </span>
+            </nav>
+          </div>
+
+          {/* contato */}
+          <div className="md:col-span-4 flex flex-col items-center md:items-start text-center md:text-left">
+            <h4 className="eyebrow text-ink mb-5">Fale conosco</h4>
+            <div className="flex flex-col gap-4 text-sm text-body">
+              <a
+                href={`https://wa.me/${config.whatsapp}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 hover:text-rose transition-colors group"
+              >
+                <span className="w-9 h-9 rounded-full bg-sand border border-line flex items-center justify-center group-hover:bg-ink group-hover:text-cream transition-colors">
+                  <FaWhatsapp className="text-sm" />
+                </span>
+                <span className="font-medium">{formatarTelefone(config.whatsapp)}</span>
+              </a>
+
+              <a
+                href={`https://www.instagram.com/${config.instagram}/`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 hover:text-rose transition-colors group"
+              >
+                <span className="w-9 h-9 rounded-full bg-sand border border-line flex items-center justify-center group-hover:bg-ink group-hover:text-cream transition-colors">
+                  <FaInstagram className="text-sm" />
+                </span>
+                <span className="font-medium">@{config.instagram}</span>
+              </a>
+
+              <p className="text-xs text-muted leading-relaxed mt-1 max-w-[240px]">
+                {config.cidade} · Respondemos todos os dias
+              </p>
+            </div>
+          </div>
         </div>
 
-        {/* DIREITOS AUTORAIS */}
-        <div className="flex flex-col md:flex-row justify-between items-center text-xs text-[#9c6662] font-sans gap-4">
-          <p>&copy; 2026 RL Store. Todos os direitos reservados.</p>
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4 pt-7 text-[11px] text-muted">
+          <p>
+            &copy; {new Date().getFullYear()} {config.nomeLoja}. Todos os direitos reservados.
+          </p>
+
+          <div className="flex items-center gap-5">
+            <a
+              href="#/admin"
+              className="inline-flex items-center gap-1.5 hover:text-rose transition-colors"
+            >
+              <FaLock className="text-[9px]" /> Área da loja
+            </a>
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="inline-flex items-center gap-1.5 hover:text-rose transition-colors"
+            >
+              Voltar ao topo <FaArrowUp className="text-[9px]" />
+            </button>
+          </div>
+
           <p>Desenvolvido com dedicação por Guilherme Mestriner.</p>
         </div>
-
       </div>
     </footer>
   );
