@@ -1,0 +1,6 @@
+# RL Store
+User-agent: *
+Allow: /
+
+# O painel administrativo abre em #/admin. Buscadores não leem o trecho
+# depois do "#", e a própria página marca noindex quando o painel está aberto.

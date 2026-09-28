@@ -58,12 +58,12 @@ const Destaques = ({ onSelecionar }) => {
               src={produto.imagens[0]}
               alt={produto.nome}
               loading="lazy"
-              className="absolute inset-0 w-full h-full object-cover transition-transform duration-[900ms] group-hover:scale-105"
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-110"
             />
             <span className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/35 to-ink/5" />
             <span className="absolute inset-0 rounded-[1.75rem] ring-1 ring-inset ring-ink/10" />
 
-            <div className="absolute inset-x-0 bottom-0 p-6 text-cream">
+            <div className="absolute inset-x-0 bottom-0 p-6 text-cream transition-transform duration-700 ease-out group-hover:-translate-y-1.5">
               <p className="text-[9px] tracking-[0.22em] uppercase text-cream/70 mb-2">
                 {produto.categoria}
               </p>

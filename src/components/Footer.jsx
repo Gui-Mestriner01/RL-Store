@@ -1,6 +1,7 @@
 import { FaWhatsapp, FaInstagram, FaLock, FaArrowUp } from 'react-icons/fa';
 import { midia } from '../lib/utils';
 import { useStore } from '../store/StoreContext';
+import Ornamento from './Ornamento';
 
 const formatarTelefone = (numero = '') => {
   const d = numero.replace(/\D/g, '').replace(/^55/, '');
@@ -104,7 +105,11 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4 pt-7 text-[11px] text-muted">
+        <div className="flex justify-center py-7">
+          <Ornamento />
+        </div>
+
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-[11px] text-muted">
           <p>
             &copy; {new Date().getFullYear()} {config.nomeLoja}. Todos os direitos reservados.
           </p>

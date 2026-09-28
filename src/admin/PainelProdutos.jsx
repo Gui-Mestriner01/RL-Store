@@ -16,6 +16,7 @@ import {
 } from 'react-icons/fa';
 import { useStore } from '../store/StoreContext';
 import { formatarPreco, parsePreco } from '../lib/utils';
+import Numero from '../components/Numero';
 
 const Switch = ({ ativo, onClick, rotulo }) => (
   <button
@@ -36,7 +37,7 @@ const Switch = ({ ativo, onClick, rotulo }) => (
 );
 
 const CartaoMetrica = ({ icone, rotulo, valor, destaque }) => (
-  <div className="bg-cream border border-line rounded-2xl p-5 sombra-suave">
+  <div data-revelar className="subir bg-cream border border-line rounded-2xl p-5 sombra-suave hover:sombra-alta">
     <div className="flex items-center gap-2.5 mb-3">
       <span
         className={`w-8 h-8 rounded-lg flex items-center justify-center text-[13px] ${
@@ -124,10 +125,10 @@ const PainelProdutos = ({ onNovo, onEditar }) => {
       </header>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-7">
-        <CartaoMetrica icone={<FaTags />} rotulo="No catálogo" valor={stats.total} destaque />
-        <CartaoMetrica icone={<FaBoxOpen />} rotulo="Esgotadas" valor={stats.esgotadas} />
-        <CartaoMetrica icone={<FaBolt />} rotulo="Novidades" valor={stats.novidades} />
-        <CartaoMetrica icone={<FaStar />} rotulo="Ticket médio" valor={formatarPreco(stats.media)} />
+        <CartaoMetrica icone={<FaTags />} rotulo="No catálogo" valor={<Numero valor={stats.total} />} destaque />
+        <CartaoMetrica icone={<FaBoxOpen />} rotulo="Esgotadas" valor={<Numero valor={stats.esgotadas} />} />
+        <CartaoMetrica icone={<FaBolt />} rotulo="Novidades" valor={<Numero valor={stats.novidades} />} />
+        <CartaoMetrica icone={<FaStar />} rotulo="Ticket médio" valor={<Numero valor={stats.media} decimais={2} prefixo="R$ " />} />
       </div>
 
       {/* filtros */}
@@ -200,6 +201,7 @@ const PainelProdutos = ({ onNovo, onEditar }) => {
           {lista.map((produto) => (
             <li
               key={produto.id}
+              data-revelar
               className={`group bg-cream border rounded-2xl p-3 flex flex-col lg:flex-row lg:items-center gap-4 transition-all sombra-suave hover:sombra-alta ${
                 produto.ativo ? 'border-line' : 'border-dashed border-muted/40 opacity-75'
               }`}

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FaPlus, FaTimes, FaSave, FaUndoAlt } from 'react-icons/fa';
+import { FaPlus, FaTimes, FaSave, FaUndoAlt, FaShieldAlt, FaKey, FaSpinner } from 'react-icons/fa';
 import { useStore } from '../store/StoreContext';
 
 const entrada =
@@ -24,9 +24,45 @@ const Campo = ({ rotulo, dica, children }) => (
 );
 
 const PainelConfig = () => {
-  const { config, salvarConfig } = useStore();
+  const {
+    config,
+    salvarConfig,
+    verificarSenha,
+    definirSenha,
+    semSenhaDefinida,
+    senhaEmFormatoAntigo,
+    avisar,
+  } = useStore();
   const [form, setForm] = useState(config);
   const [novaCategoria, setNovaCategoria] = useState('');
+  const [senhas, setSenhas] = useState({ atual: '', nova: '', confirma: '' });
+  const [trocando, setTrocando] = useState(false);
+
+  const trocarSenha = async (evento) => {
+    evento.preventDefault();
+    if (trocando) return;
+
+    if (senhas.nova.length < 8) {
+      avisar('A nova senha precisa ter pelo menos 8 caracteres.', 'erro');
+      return;
+    }
+    if (senhas.nova !== senhas.confirma) {
+      avisar('A confirmação não bate com a nova senha.', 'erro');
+      return;
+    }
+
+    setTrocando(true);
+    const confere = await verificarSenha(senhas.atual);
+    if (!confere) {
+      setTrocando(false);
+      avisar('A senha atual está incorreta.', 'erro');
+      return;
+    }
+
+    await definirSenha(senhas.nova);
+    setSenhas({ atual: '', nova: '', confirma: '' });
+    setTrocando(false);
+  };
 
   const mudar = (campo, valor) => setForm((f) => ({ ...f, [campo]: valor }));
   const alterado = JSON.stringify(form) !== JSON.stringify(config);
@@ -130,10 +166,73 @@ const PainelConfig = () => {
             </div>
           </Bloco>
 
-          <Bloco titulo="Acesso ao painel" descricao="Trava simples no navegador — não substitui um login de servidor.">
-            <Campo rotulo="Senha do painel">
-              <input value={form.senhaAdmin} onChange={(e) => mudar('senhaAdmin', e.target.value)} className={entrada} />
-            </Campo>
+          <Bloco
+            titulo="Acesso ao painel"
+            descricao="A senha é guardada como hash (PBKDF2) neste navegador — nunca em texto puro, nem no código do site."
+          >
+            {(semSenhaDefinida || senhaEmFormatoAntigo) && (
+              <div className="flex gap-3 bg-blush/40 border border-line rounded-xl p-4 mb-5">
+                <FaShieldAlt className="text-rose shrink-0 mt-0.5 text-sm" />
+                <p className="text-[11px] text-ink leading-relaxed">
+                  {semSenhaDefinida
+                    ? 'Nenhuma senha definida neste navegador ainda.'
+                    : 'Sua senha veio de uma versão antiga e está guardada sem hash. Defina uma nova para protegê-la.'}
+                </p>
+              </div>
+            )}
+
+            <form onSubmit={trocarSenha}>
+              <Campo rotulo="Senha atual">
+                <input
+                  type="password"
+                  autoComplete="current-password"
+                  value={senhas.atual}
+                  onChange={(e) => setSenhas((s) => ({ ...s, atual: e.target.value }))}
+                  placeholder="••••••••"
+                  className={entrada}
+                />
+              </Campo>
+
+              <div className="grid sm:grid-cols-2 gap-x-4">
+                <Campo rotulo="Nova senha" dica="Pelo menos 8 caracteres.">
+                  <input
+                    type="password"
+                    autoComplete="new-password"
+                    value={senhas.nova}
+                    onChange={(e) => setSenhas((s) => ({ ...s, nova: e.target.value }))}
+                    placeholder="••••••••"
+                    className={entrada}
+                  />
+                </Campo>
+
+                <Campo rotulo="Repita a nova senha">
+                  <input
+                    type="password"
+                    autoComplete="new-password"
+                    value={senhas.confirma}
+                    onChange={(e) => setSenhas((s) => ({ ...s, confirma: e.target.value }))}
+                    placeholder="••••••••"
+                    className={entrada}
+                  />
+                </Campo>
+              </div>
+
+              <button
+                type="submit"
+                disabled={trocando || !senhas.atual || !senhas.nova}
+                className="w-full py-3.5 rounded-xl bg-ink text-cream text-[11px] font-bold tracking-[0.14em] uppercase hover:bg-rosedark transition-colors flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {trocando ? <FaSpinner className="animate-spin text-xs" /> : <FaKey className="text-xs" />}
+                {trocando ? 'Guardando' : 'Trocar senha'}
+              </button>
+
+              <p className="text-[11px] text-muted mt-3 leading-relaxed">
+                Guarde a senha num lugar seguro: como não há servidor, não existe
+                recuperação. Esquecendo, dá para voltar à senha de fábrica
+                limpando os dados do site no navegador — o que também apaga o
+                catálogo, então mantenha um backup.
+              </p>
+            </form>
           </Bloco>
 
           <div className="flex gap-3 mb-6">

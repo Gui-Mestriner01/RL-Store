@@ -139,5 +139,8 @@ export const CONFIG_PADRAO = {
     '/roupas/insta3.jpg',
     '/roupas/insta4.jpg',
   ],
-  senhaAdmin: 'rlstore2026',
+  // Não existe senha no código: no primeiro acesso ao painel você cria a sua,
+  // e só o hash (PBKDF2) dela fica guardado no navegador.
+  // Veja src/lib/seguranca.js.
+  acesso: null,
 };

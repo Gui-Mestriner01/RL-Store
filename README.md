@@ -16,7 +16,9 @@ A loja abre em `http://localhost:5173/`.
 
 Acesse `http://localhost:5173/#/admin` (ou o link **Área da loja** no rodapé).
 
-- Senha inicial: `rlstore2026` — troque na aba **Loja**.
+- **Não existe senha no código.** No primeiro acesso o painel pede que você
+  crie uma; ela é guardada como hash PBKDF2-SHA256 (150 mil iterações, com sal
+  aleatório) no navegador, e pode ser trocada na aba **Loja**.
 - Layout de dashboard: menu lateral no PC, abas no celular.
 - **Peças**: adicionar, editar, excluir, marcar como esgotada, ocultar da loja,
   colocar em destaque, reordenar a vitrine e editar o preço direto na lista.
@@ -25,8 +27,22 @@ Acesse `http://localhost:5173/#/admin` (ou o link **Área da loja** no rodapé).
 - **Backup**: exportar/importar um `.json` com tudo e gerar um `produtos-seed.js`
   para deixar o catálogo fixo no código.
 
-> A senha é uma trava simples no navegador, não uma autenticação de servidor.
-> Ela serve para evitar acesso casual, não para proteger dados sensíveis.
+## Segurança — o que dá e o que não dá
+
+O site é estático, sem servidor. Então:
+
+- A senha do painel **nunca** aparece em texto puro: nem no código, nem no
+  backup, nem no `localStorage` — só o hash com sal.
+- O login tem bloqueio progressivo (5 erros → 1 min, 8 → 5 min, 10 → 15 min) e
+  a sessão do painel expira em 2 horas.
+- Backups importados passam por validação: só campos conhecidos entram, e as
+  imagens precisam ser caminho relativo, `http(s)` ou base64 de imagem.
+- O painel se marca como `noindex` e o site vai com cabeçalhos de segurança no
+  `public/.htaccess` (CSP, X-Frame-Options, Referrer-Policy, HSTS).
+- **O que isso não é:** autenticação de verdade. Sem servidor, quem tem acesso
+  ao computador e conhecimento técnico consegue mexer nos dados locais. Por
+  isso o painel só edita o catálogo daquele navegador — não guarde dados de
+  clientes, pagamentos ou qualquer informação sensível aqui.
 
 ## Como os dados são guardados
 
@@ -75,11 +91,24 @@ src/
 - Favoritos e sacola persistentes, com envio da lista pronta para o WhatsApp.
 - Responsivo de verdade: navegação inferior no celular, gavetas laterais no PC.
 
-## Sistema de design
+## Sistema de design e movimento
 
 Os tokens ficam em `src/index.css` (`@theme` do Tailwind v4): paleta da marca,
-sombras, fontes Playfair Display + Inter, animações, textura de papel (`.grao`),
-chave liga/desliga (`.switch`) e foco visível para navegação por teclado.
+sombras, fontes Playfair Display + Inter, curvas de animação (`--ease-suave`,
+`--ease-mola`), textura de papel (`.grao`), fundo pontilhado, brilho no hover
+(`.brilho`), chave liga/desliga (`.switch`) e foco visível para teclado.
+
+O movimento mora em `src/hooks/animacoes.js`:
+
+- `useRevelar(dep)` — revela os elementos `data-revelar` em cascata quando
+  entram na tela; passe uma dependência para reanimar (filtro, busca, aba).
+- `useParallax(f)` — o elemento desliza mais devagar que a página.
+- `useContador(valor)` — números que contam do zero ao entrar na tela.
+- `useSeguirMouse(px)` — o elemento acompanha o cursor de leve.
+- `useTituloAoSair(texto)` — troca o título da aba quando a pessoa sai.
+
+Tudo respeita `prefers-reduced-motion`: quem pede menos movimento no sistema
+vê a página inteira estática, sem nada escondido.
 
 ---
 

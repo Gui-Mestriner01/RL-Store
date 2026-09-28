@@ -9,6 +9,13 @@ import {
 } from 'react';
 import { PRODUTOS_SEED, CONFIG_PADRAO } from '../data/seed';
 import { load, save, uid, parsePreco, midia } from '../lib/utils';
+import {
+  conferirSenha,
+  criarRegistroSenha,
+  urlDeImagemSegura,
+  textoLimpo,
+  corSegura,
+} from '../lib/seguranca';
 
 const CHAVES = {
   produtos: 'rl_produtos_v2',
@@ -21,21 +28,33 @@ const StoreContext = createContext(null);
 
 /** Garante que todo produto tenha a mesma "forma", venha de onde vier. */
 export const normalizarProduto = (bruto = {}) => ({
-  id: bruto.id || uid(),
-  nome: (bruto.nome || 'Peça sem nome').trim(),
-  preco: parsePreco(bruto.preco),
+  id: textoLimpo(bruto.id, 60) || uid(),
+  nome: textoLimpo(bruto.nome, 120) || 'Peça sem nome',
+  preco: Math.max(0, parsePreco(bruto.preco)),
   precoAntigo:
     bruto.precoAntigo === null || bruto.precoAntigo === undefined || bruto.precoAntigo === ''
       ? null
-      : parsePreco(bruto.precoAntigo),
-  categoria: bruto.categoria || 'Outros',
-  descricao: bruto.descricao || '',
-  aviso: bruto.aviso || '',
-  imagens: Array.isArray(bruto.imagens) ? bruto.imagens.filter(Boolean).map(midia) : [],
-  tamanhos: Array.isArray(bruto.tamanhos) && bruto.tamanhos.length
-    ? bruto.tamanhos
-    : ['Tamanho Único'],
-  cores: Array.isArray(bruto.cores) ? bruto.cores.filter((c) => c && c.nome) : [],
+      : Math.max(0, parsePreco(bruto.precoAntigo)),
+  categoria: textoLimpo(bruto.categoria, 40) || 'Outros',
+  descricao: textoLimpo(bruto.descricao, 1200),
+  aviso: textoLimpo(bruto.aviso, 300),
+  // só entram caminhos de imagem reconhecidos (relativo, http(s) ou base64)
+  imagens: Array.isArray(bruto.imagens)
+    ? bruto.imagens
+        .slice(0, 12)
+        .map((img) => urlDeImagemSegura(midia(img)))
+        .filter(Boolean)
+    : [],
+  tamanhos:
+    Array.isArray(bruto.tamanhos) && bruto.tamanhos.length
+      ? bruto.tamanhos.slice(0, 12).map((t) => textoLimpo(t, 30)).filter(Boolean)
+      : ['Tamanho Único'],
+  cores: Array.isArray(bruto.cores)
+    ? bruto.cores
+        .slice(0, 12)
+        .filter((c) => c && c.nome)
+        .map((c) => ({ nome: textoLimpo(c.nome, 30), hex: corSegura(c.hex) }))
+    : [],
   novoLancamento: Boolean(bruto.novoLancamento ?? bruto['novoLançamento']),
   destaque: Boolean(bruto.destaque),
   esgotado: Boolean(bruto.esgotado),
@@ -48,10 +67,14 @@ export function StoreProvider({ children }) {
   const [produtos, setProdutos] = useState(() =>
     load(CHAVES.produtos, PRODUTOS_SEED).map(normalizarProduto)
   );
-  const [config, setConfig] = useState(() => ({
-    ...CONFIG_PADRAO,
-    ...load(CHAVES.config, {}),
-  }));
+  const [config, setConfig] = useState(() => {
+    const guardado = load(CHAVES.config, {});
+    // versões antigas guardavam a senha em texto puro: descartamos esse campo
+    // e o painel pede uma senha nova no próximo acesso
+    const { senhaAdmin, ...resto } = guardado;
+    void senhaAdmin;
+    return { ...CONFIG_PADRAO, ...resto, acesso: resto.acesso || null };
+  });
   const [favoritos, setFavoritos] = useState(() =>
     load(CHAVES.favoritos, []).map(String)
   );
@@ -187,8 +210,37 @@ export function StoreProvider({ children }) {
   /* ---------------- configurações ---------------- */
   const salvarConfig = useCallback(
     (novos) => {
-      setConfig((atual) => ({ ...atual, ...novos }));
+      // a senha nunca passa por aqui — ela tem caminho próprio, com hash
+      const limpos = { ...novos };
+      delete limpos.acesso;
+      delete limpos.senhaAdmin;
+      setConfig((atual) => ({ ...atual, ...limpos }));
       avisar('Configurações da loja salvas.');
+    },
+    [avisar]
+  );
+
+  /** Ainda não existe senha neste navegador — é o primeiro acesso. */
+  const semSenhaDefinida = !config.acesso;
+  // senha herdada da versão antiga, guardada sem hash
+  const senhaEmFormatoAntigo = config.acesso?.tipo === 'simples';
+
+  /** Confere a senha digitada no login. */
+  const verificarSenha = useCallback(
+    async (senha) => {
+      if (!config.acesso) return false;
+      return conferirSenha(senha, config.acesso);
+    },
+    [config.acesso]
+  );
+
+  /** Define uma senha nova guardando apenas o hash. */
+  const definirSenha = useCallback(
+    async (senhaNova) => {
+      const registro = await criarRegistroSenha(senhaNova);
+      setConfig((atual) => ({ ...atual, acesso: registro }));
+      avisar('Senha do painel atualizada.');
+      return true;
     },
     [avisar]
   );
@@ -301,6 +353,10 @@ export function StoreProvider({ children }) {
     substituirCatalogo,
     restaurarSeed,
     salvarConfig,
+    verificarSenha,
+    definirSenha,
+    semSenhaDefinida,
+    senhaEmFormatoAntigo,
     ehFavorito,
     alternarFavorito,
     adicionarNaSacola,

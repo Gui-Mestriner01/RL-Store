@@ -24,7 +24,14 @@ const PainelBackup = () => {
   const [confirmando, setConfirmando] = useState(false);
 
   const exportarJSON = () => {
-    const conteudo = JSON.stringify({ versao: 2, config, produtos }, null, 2);
+    // o hash da senha não sai no backup
+    const configSemSenha = { ...config };
+    delete configSemSenha.acesso;
+    const conteudo = JSON.stringify(
+      { versao: 3, config: configSemSenha, produtos },
+      null,
+      2
+    );
     baixarArquivo(`rl-store-backup-${dataHoje()}.json`, conteudo);
     avisar('Backup baixado.');
   };
@@ -45,17 +52,54 @@ const PainelBackup = () => {
     avisar('Arquivo gerado. Fotos enviadas pelo painel não entram nele.', 'aviso');
   };
 
+  const LIMITE_ARQUIVO = 25 * 1024 * 1024; // 25 MB
+  const CAMPOS_DE_CONFIG = [
+    'nomeLoja',
+    'frase',
+    'subtitulo',
+    'whatsapp',
+    'instagram',
+    'cidade',
+    'categorias',
+    'fotosInstagram',
+  ];
+
   const importarJSON = (evento) => {
     const arquivo = evento.target.files?.[0];
     if (!arquivo) return;
+
+    if (arquivo.size > LIMITE_ARQUIVO) {
+      avisar('Arquivo grande demais para um backup do catálogo.', 'erro');
+      if (inputArquivo.current) inputArquivo.current.value = '';
+      return;
+    }
+
     const leitor = new FileReader();
+    leitor.onerror = () => avisar('Não consegui ler o arquivo.', 'erro');
     leitor.onload = () => {
       try {
         const dados = JSON.parse(leitor.result);
-        const lista = Array.isArray(dados) ? dados : dados.produtos;
-        if (!Array.isArray(lista)) throw new Error('formato');
+        const lista = Array.isArray(dados) ? dados : dados?.produtos;
+        if (!Array.isArray(lista) || lista.length > 500) throw new Error('formato');
+
+        // as peças passam pela normalização, que limpa textos, cores e imagens
         substituirCatalogo(lista, `${lista.length} peças importadas.`);
-        if (dados.config) salvarConfig(dados.config);
+
+        // do arquivo só aproveitamos campos conhecidos — nunca senha ou acesso
+        if (dados?.config && typeof dados.config === 'object') {
+          const limpos = {};
+          CAMPOS_DE_CONFIG.forEach((campo) => {
+            const valor = dados.config[campo];
+            if (typeof valor === 'string') limpos[campo] = valor.slice(0, 300);
+            if (Array.isArray(valor)) {
+              limpos[campo] = valor
+                .filter((v) => typeof v === 'string')
+                .slice(0, 30)
+                .map((v) => v.slice(0, 200));
+            }
+          });
+          if (Object.keys(limpos).length) salvarConfig(limpos);
+        }
       } catch {
         avisar('Arquivo inválido. Use um backup exportado por este painel.', 'erro');
       }
@@ -85,7 +129,7 @@ const PainelBackup = () => {
 
       <Cartao
         titulo="Backup completo"
-        texto="Baixa um arquivo .json com todas as peças, fotos e configurações. Guarde no Drive ou no celular."
+        texto="Baixa um arquivo .json com todas as peças, fotos e textos da loja. A senha do painel não vai no arquivo. Guarde no Drive ou no celular."
       >
         <button onClick={exportarJSON} className={`${botao} bg-ink text-cream hover:bg-rosedark`}>
           <FaDownload className="text-xs" /> Baixar backup (.json)

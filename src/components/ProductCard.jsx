@@ -6,6 +6,7 @@ import { formatarPreco } from '../lib/utils';
 const ProductCard = ({ product, onClick }) => {
   const { ehFavorito, alternarFavorito, adicionarNaSacola } = useStore();
   const [carregou, setCarregou] = useState(false);
+  const [batendo, setBatendo] = useState(false);
   const favorito = ehFavorito(product.id);
 
   const capa = product.imagens[0] || '';
@@ -24,6 +25,15 @@ const ProductCard = ({ product, onClick }) => {
     });
   };
 
+  const favoritar = (e) => {
+    e.stopPropagation();
+    if (!favorito) {
+      setBatendo(true);
+      setTimeout(() => setBatendo(false), 600);
+    }
+    alternarFavorito(product.id);
+  };
+
   return (
     <article data-revelar className="group flex flex-col">
       <div
@@ -32,7 +42,7 @@ const ProductCard = ({ product, onClick }) => {
         tabIndex={0}
         onKeyDown={(e) => e.key === 'Enter' && onClick()}
         aria-label={`Ver detalhes de ${product.nome}`}
-        className="relative aspect-[3/4] rounded-[1.5rem] overflow-hidden bg-blush/30 cursor-pointer sombra-suave group-hover:sombra-alta transition-shadow duration-500"
+        className="subir relative aspect-[3/4] rounded-[1.5rem] overflow-hidden bg-blush/30 cursor-pointer sombra-suave group-hover:sombra-alta"
       >
         {!carregou && <div className="absolute inset-0 skeleton" />}
 
@@ -41,21 +51,21 @@ const ProductCard = ({ product, onClick }) => {
           alt={product.nome}
           loading="lazy"
           onLoad={() => setCarregou(true)}
-          className={`absolute inset-0 w-full h-full object-cover transition-all duration-[800ms] group-hover:opacity-0 group-hover:scale-105 ${
-            product.esgotado ? 'grayscale-[65%]' : ''
-          }`}
+          className={`absolute inset-0 w-full h-full object-cover group-hover:opacity-0 group-hover:scale-[1.07] ${
+            carregou ? 'foto-pronta' : 'foto-entrando'
+          } ${product.esgotado ? 'grayscale-[65%]' : ''}`}
+          style={{ transitionDuration: '900ms' }}
         />
         <img
           src={verso}
           alt=""
           aria-hidden="true"
           loading="lazy"
-          className={`absolute inset-0 w-full h-full object-cover opacity-0 scale-105 transition-all duration-[800ms] group-hover:opacity-100 group-hover:scale-100 ${
+          className={`absolute inset-0 w-full h-full object-cover opacity-0 scale-105 transition-all duration-[900ms] ease-out group-hover:opacity-100 group-hover:scale-100 ${
             product.esgotado ? 'grayscale-[65%]' : ''
           }`}
         />
 
-        {/* borda interna fininha, dá acabamento */}
         <span className="absolute inset-0 rounded-[1.5rem] ring-1 ring-inset ring-ink/5 pointer-events-none" />
 
         {/* selos */}
@@ -78,15 +88,14 @@ const ProductCard = ({ product, onClick }) => {
         </div>
 
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            alternarFavorito(product.id);
-          }}
+          onClick={favoritar}
           aria-label={favorito ? 'Remover dos favoritos' : 'Salvar nos favoritos'}
-          className={`absolute top-3.5 right-3.5 w-9 h-9 flex items-center justify-center rounded-full backdrop-blur-md transition-all duration-300 ${
+          className={`absolute top-3.5 right-3.5 w-9 h-9 flex items-center justify-center rounded-full backdrop-blur-md transition-all duration-400 ${
+            batendo ? 'anel-coracao' : ''
+          } ${
             favorito
               ? 'bg-cream text-rose scale-105 sombra-suave'
-              : 'bg-cream/75 text-muted hover:bg-cream hover:text-rose md:opacity-0 md:group-hover:opacity-100'
+              : 'bg-cream/75 text-muted hover:bg-cream hover:text-rose hover:scale-110 md:opacity-0 md:group-hover:opacity-100'
           }`}
         >
           {favorito ? <FaHeart className="text-[13px] animate-pop" /> : <FaRegHeart className="text-[13px]" />}
@@ -95,7 +104,7 @@ const ProductCard = ({ product, onClick }) => {
         {!product.esgotado && (
           <button
             onClick={adicionarRapido}
-            className="absolute bottom-3.5 left-3.5 right-3.5 flex items-center justify-center gap-2 py-3 rounded-full bg-cream/95 text-ink text-[10px] font-bold tracking-[0.16em] uppercase opacity-0 translate-y-3 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-400 hover:bg-ink hover:text-cream sombra-alta"
+            className="brilho absolute bottom-3.5 left-3.5 right-3.5 flex items-center justify-center gap-2 py-3 rounded-full bg-cream/95 text-ink text-[10px] font-bold tracking-[0.16em] uppercase opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 ease-out hover:bg-ink hover:text-cream sombra-alta"
           >
             <FaShoppingBag className="text-[11px]" /> Adicionar
           </button>
@@ -117,7 +126,7 @@ const ProductCard = ({ product, onClick }) => {
 
         <h3
           onClick={onClick}
-          className="text-[15px] font-medium text-ink leading-snug line-clamp-2 cursor-pointer group-hover:text-rosedark transition-colors"
+          className="text-[15px] font-medium text-ink leading-snug line-clamp-2 cursor-pointer group-hover:text-rosedark transition-colors duration-300"
         >
           {product.nome}
         </h3>
@@ -136,12 +145,12 @@ const ProductCard = ({ product, onClick }) => {
 
           {product.cores.length > 0 && (
             <div className="flex items-center gap-1 pb-0.5">
-              {product.cores.slice(0, 4).map((cor) => (
+              {product.cores.slice(0, 4).map((cor, i) => (
                 <span
                   key={cor.nome}
                   title={cor.nome}
-                  className="w-3 h-3 rounded-full ring-1 ring-inset ring-ink/15"
-                  style={{ backgroundColor: cor.hex }}
+                  className="w-3 h-3 rounded-full ring-1 ring-inset ring-ink/15 transition-transform duration-300 group-hover:scale-125"
+                  style={{ backgroundColor: cor.hex, transitionDelay: `${i * 40}ms` }}
                 />
               ))}
             </div>

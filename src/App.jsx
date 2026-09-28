@@ -8,17 +8,19 @@ import Destaques from './components/Destaques';
 import CategoryFilter from './components/CategoryFilter';
 import ProductGrid from './components/ProductGrid';
 import ProductModal from './components/ProductModal';
+import Manifesto from './components/Manifesto';
 import BenefitsBar from './components/BenefitsBar';
 import ComoFunciona from './components/ComoFunciona';
 import InstagramFeed from './components/InstagramFeed';
 import FaixaCTA from './components/FaixaCTA';
 import Footer from './components/Footer';
 import BottomNav from './components/BottomNav';
+import Cortina from './components/Cortina';
 import SacolaDrawer from './components/SacolaDrawer';
 import FavoritosDrawer from './components/FavoritosDrawer';
 
 import { useStore } from './store/StoreContext';
-import { useRevelar } from './hooks/useHashRoute';
+import { useRevelar, useTituloAoSair } from './hooks/animacoes';
 
 const POR_PAGINA = 8;
 
@@ -36,7 +38,9 @@ function App() {
   const [sacolaAberta, setSacolaAberta] = useState(false);
   const [favoritosAbertos, setFavoritosAbertos] = useState(false);
 
-  useRevelar();
+  // reanima sempre que a vitrine muda (filtro, busca, "ver mais")
+  useRevelar(`${categoria}|${busca}|${ordenacao}|${visiveis}`);
+  useTituloAoSair(`${config.nomeLoja} — a gente te espera ♡`);
 
   const filtrados = useMemo(() => {
     const termo = normalizar(busca.trim());
@@ -85,6 +89,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-sand text-body pb-20 md:pb-0">
+      <Cortina />
       <BarraProgresso />
 
       <Header
@@ -132,6 +137,7 @@ function App() {
         </div>
       </main>
 
+      <Manifesto />
       <BenefitsBar />
       <ComoFunciona />
       <InstagramFeed />

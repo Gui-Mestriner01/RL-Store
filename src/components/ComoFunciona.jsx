@@ -20,7 +20,9 @@ const PASSOS = [
 ];
 
 const ComoFunciona = () => (
-  <section id="como-funciona" className="px-5 md:px-8 py-20 md:py-24 max-w-[1280px] mx-auto">
+  <section id="como-funciona" className="relative px-5 md:px-8 py-20 md:py-24">
+    <div className="absolute inset-0 pontilhado opacity-30 pointer-events-none" />
+    <div className="relative max-w-[1280px] mx-auto">
     <TituloSecao
       eyebrow="Simples assim"
       titulo="Como"
@@ -33,9 +35,9 @@ const ComoFunciona = () => (
         <article
           key={passo.titulo}
           data-revelar
-          className="grao relative bg-cream border border-line rounded-[1.75rem] p-8 pt-10 overflow-hidden group hover:-translate-y-1 transition-transform duration-500 sombra-suave hover:sombra-alta"
+          className="subir grao relative bg-cream border border-line rounded-[1.75rem] p-8 pt-10 overflow-hidden group sombra-suave hover:sombra-alta"
         >
-          <span className="absolute top-5 right-7 font-display italic text-6xl text-blush/70 leading-none select-none">
+          <span className="absolute top-5 right-7 font-display italic text-6xl text-blush/70 leading-none select-none transition-all duration-700 group-hover:text-rose/30 group-hover:scale-110">
             {i + 1}
           </span>
 
@@ -47,6 +49,7 @@ const ComoFunciona = () => (
           <p className="text-body text-sm leading-relaxed text-pretty">{passo.texto}</p>
         </article>
       ))}
+      </div>
     </div>
   </section>
 );

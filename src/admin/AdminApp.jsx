@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   FaBoxOpen,
   FaCog,
@@ -13,8 +13,8 @@ import PainelBackup from './PainelBackup';
 import ProdutoForm from './ProdutoForm';
 import { useStore } from '../store/StoreContext';
 import { midia } from '../lib/utils';
-
-const CHAVE_SESSAO = 'rl_admin_sessao';
+import { useRevelar } from '../hooks/animacoes';
+import { abrirSessao, sessaoValida, fecharSessao } from '../lib/seguranca';
 
 const ABAS = [
   { id: 'produtos', rotulo: 'Peças', icone: <FaBoxOpen />, descricao: 'Catálogo da loja' },
@@ -24,18 +24,41 @@ const ABAS = [
 
 const AdminApp = () => {
   const { config, produtos } = useStore();
-  const [autenticado, setAutenticado] = useState(
-    () => sessionStorage.getItem(CHAVE_SESSAO) === 'ok'
-  );
+  const [autenticado, setAutenticado] = useState(() => sessaoValida());
   const [aba, setAba] = useState('produtos');
   const [formAberto, setFormAberto] = useState(false);
   const [produtoEditando, setProdutoEditando] = useState(null);
+
+  useRevelar(`${aba}|${produtos.length}|${autenticado}`);
+
+  // a sessão do painel vale 2 horas; confere ao voltar para a aba
+  useEffect(() => {
+    if (!autenticado) return;
+    const conferir = () => {
+      if (!sessaoValida()) setAutenticado(false);
+    };
+    const relogio = setInterval(conferir, 60000);
+    document.addEventListener('visibilitychange', conferir);
+    return () => {
+      clearInterval(relogio);
+      document.removeEventListener('visibilitychange', conferir);
+    };
+  }, [autenticado]);
+
+  // o painel nunca deve ser indexado por buscadores
+  useEffect(() => {
+    const marca = document.createElement('meta');
+    marca.name = 'robots';
+    marca.content = 'noindex, nofollow';
+    document.head.appendChild(marca);
+    return () => marca.remove();
+  }, []);
 
   if (!autenticado) {
     return (
       <AdminLogin
         onEntrar={() => {
-          sessionStorage.setItem(CHAVE_SESSAO, 'ok');
+          abrirSessao();
           setAutenticado(true);
         }}
       />
@@ -53,7 +76,7 @@ const AdminApp = () => {
   };
 
   const sair = () => {
-    sessionStorage.removeItem(CHAVE_SESSAO);
+    fecharSessao();
     setAutenticado(false);
   };
 
@@ -86,6 +109,16 @@ const AdminApp = () => {
             </button>
           ))}
         </nav>
+
+        <div className="p-3">
+          <div className="px-4 py-4 rounded-xl bg-rose/10 border border-cream/10">
+            <p className="text-[10px] tracking-[0.16em] uppercase text-blush mb-1.5">Dica</p>
+            <p className="text-[11px] text-cream/60 leading-relaxed">
+              Exporte um backup na aba <span className="text-cream">Backup</span> sempre que
+              cadastrar peças novas.
+            </p>
+          </div>
+        </div>
 
         <div className="p-3 border-t border-cream/10">
           <div className="px-4 py-3 mb-2 rounded-xl bg-cream/5">

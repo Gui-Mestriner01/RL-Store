@@ -42,25 +42,3 @@ export function useEscape(acao, ativo = true) {
     return () => window.removeEventListener('keydown', aoTeclar);
   }, [acao, ativo]);
 }
-
-/** Revela elementos quando entram na tela. */
-export function useRevelar() {
-  useEffect(() => {
-    const alvos = document.querySelectorAll('[data-revelar]');
-    if (!alvos.length) return;
-    const obs = new IntersectionObserver(
-      (entradas) => {
-        entradas.forEach((entrada) => {
-          if (entrada.isIntersecting) {
-            entrada.target.classList.add('animate-fade-up');
-            entrada.target.removeAttribute('data-revelar');
-            obs.unobserve(entrada.target);
-          }
-        });
-      },
-      { threshold: 0.12 }
-    );
-    alvos.forEach((alvo) => obs.observe(alvo));
-    return () => obs.disconnect();
-  });
-}

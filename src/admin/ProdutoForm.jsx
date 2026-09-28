@@ -88,13 +88,41 @@ const ProdutoForm = ({ produto, onFechar }) => {
   const mudar = (campo, valor) => setDados((d) => ({ ...d, [campo]: valor }));
 
   /* -------- imagens -------- */
+  const LIMITE_FOTO = 15 * 1024 * 1024; // 15 MB por foto
+  const MAX_FOTOS = 10;
+
   const aoEscolherArquivos = async (evento) => {
     const arquivos = Array.from(evento.target.files || []);
     if (!arquivos.length) return;
+
+    const vagas = MAX_FOTOS - dados.imagens.length;
+    if (vagas <= 0) {
+      avisar(`Máximo de ${MAX_FOTOS} fotos por peça.`, 'erro');
+      if (inputArquivo.current) inputArquivo.current.value = '';
+      return;
+    }
+
+    const aceitos = arquivos.slice(0, vagas).filter((arquivo) => {
+      if (!arquivo.type.startsWith('image/')) {
+        avisar(`"${arquivo.name}" não é uma imagem.`, 'erro');
+        return false;
+      }
+      if (arquivo.size > LIMITE_FOTO) {
+        avisar(`"${arquivo.name}" passa de 15 MB.`, 'erro');
+        return false;
+      }
+      return true;
+    });
+
+    if (!aceitos.length) {
+      if (inputArquivo.current) inputArquivo.current.value = '';
+      return;
+    }
+
     setCarregandoFoto(true);
     try {
       const convertidas = [];
-      for (const arquivo of arquivos) {
+      for (const arquivo of aceitos) {
         convertidas.push(await comprimirImagem(arquivo));
       }
       setDados((d) => ({ ...d, imagens: [...d.imagens, ...convertidas] }));
