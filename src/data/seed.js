@@ -139,8 +139,7 @@ export const CONFIG_PADRAO = {
     '/roupas/insta3.jpg',
     '/roupas/insta4.jpg',
   ],
-  // Não existe senha no código: no primeiro acesso ao painel você cria a sua,
-  // e só o hash (PBKDF2) dela fica guardado no navegador.
-  // Veja src/lib/seguranca.js.
+  // A senha do painel não mora aqui: ela é definida com `npm run senha`,
+  // que grava só o hash em src/data/acesso.js.
   acesso: null,
 };

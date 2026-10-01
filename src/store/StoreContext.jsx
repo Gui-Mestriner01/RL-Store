@@ -8,6 +8,7 @@ import {
   useState,
 } from 'react';
 import { PRODUTOS_SEED, CONFIG_PADRAO } from '../data/seed';
+import { ACESSO_PADRAO } from '../data/acesso';
 import { load, save, uid, parsePreco, midia } from '../lib/utils';
 import {
   conferirSenha,
@@ -220,16 +221,22 @@ export function StoreProvider({ children }) {
     [avisar]
   );
 
-  /** Ainda não existe senha neste navegador — é o primeiro acesso. */
-  const semSenhaDefinida = !config.acesso;
+  // Quando existe uma senha definida no código (npm run senha), ela vale para
+  // todos os navegadores e tem prioridade sobre qualquer senha local.
+  const senhaNoCodigo = Boolean(ACESSO_PADRAO);
+  const acessoEmUso = ACESSO_PADRAO || config.acesso;
+
+  /** Ninguém definiu senha ainda — primeiro acesso neste navegador. */
+  const semSenhaDefinida = !acessoEmUso;
   // senha herdada da versão antiga, guardada sem hash
-  const senhaEmFormatoAntigo = config.acesso?.tipo === 'simples';
+  const senhaEmFormatoAntigo = !senhaNoCodigo && config.acesso?.tipo === 'simples';
 
   /** Confere a senha digitada no login. */
   const verificarSenha = useCallback(
     async (senha) => {
-      if (!config.acesso) return false;
-      return conferirSenha(senha, config.acesso);
+      const registro = ACESSO_PADRAO || config.acesso;
+      if (!registro) return false;
+      return conferirSenha(senha, registro);
     },
     [config.acesso]
   );
@@ -357,6 +364,7 @@ export function StoreProvider({ children }) {
     definirSenha,
     semSenhaDefinida,
     senhaEmFormatoAntigo,
+    senhaNoCodigo,
     ehFavorito,
     alternarFavorito,
     adicionarNaSacola,

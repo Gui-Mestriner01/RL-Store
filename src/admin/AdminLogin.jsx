@@ -10,7 +10,8 @@ import {
 } from '../lib/seguranca';
 
 const AdminLogin = ({ onEntrar }) => {
-  const { config, produtos, verificarSenha, definirSenha, semSenhaDefinida } = useStore();
+  const { config, produtos, verificarSenha, definirSenha, semSenhaDefinida, senhaNoCodigo } =
+    useStore();
   const [senha, setSenha] = useState('');
   const [confirma, setConfirma] = useState('');
   const [erro, setErro] = useState('');
@@ -219,9 +220,9 @@ const AdminLogin = ({ onEntrar }) => {
           </a>
 
           <p className="text-[11px] text-muted/80 mt-8 text-center leading-relaxed">
-            A senha é guardada como hash no seu navegador (PBKDF2), nunca em
-            texto puro. Como o site não tem servidor, isso protege contra acesso
-            casual — não guarde dados sensíveis aqui.
+            {senhaNoCodigo
+              ? 'A mesma senha vale em qualquer aparelho, guardada como hash (PBKDF2), nunca em texto puro. Como o site não tem servidor, isso protege contra acesso casual — não guarde dados sensíveis aqui.'
+              : 'A senha é guardada como hash no seu navegador (PBKDF2), nunca em texto puro. Como o site não tem servidor, isso protege contra acesso casual — não guarde dados sensíveis aqui.'}
           </p>
         </form>
       </div>

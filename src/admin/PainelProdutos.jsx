@@ -36,8 +36,13 @@ const Switch = ({ ativo, onClick, rotulo }) => (
   </button>
 );
 
-const CartaoMetrica = ({ icone, rotulo, valor, destaque }) => (
-  <div data-revelar className="subir bg-cream border border-line rounded-2xl p-5 sombra-suave hover:sombra-alta">
+const CartaoMetrica = ({ icone, rotulo, valor, destaque, largo }) => (
+  <div
+    data-revelar
+    className={`subir bg-cream border border-line rounded-2xl p-5 sombra-suave hover:sombra-alta ${
+      largo ? 'col-span-2 lg:col-span-1' : ''
+    }`}
+  >
     <div className="flex items-center gap-2.5 mb-3">
       <span
         className={`w-8 h-8 rounded-lg flex items-center justify-center text-[13px] ${
@@ -88,18 +93,14 @@ const PainelProdutos = ({ onNovo, onEditar }) => {
     });
   }, [produtos, busca, filtro, categoria]);
 
-  const stats = useMemo(() => {
-    const ativos = produtos.filter((p) => p.ativo);
-    const media = ativos.length
-      ? ativos.reduce((s, p) => s + p.preco, 0) / ativos.length
-      : 0;
-    return {
+  const stats = useMemo(
+    () => ({
       total: produtos.length,
       esgotadas: produtos.filter((p) => p.esgotado).length,
       novidades: produtos.filter((p) => p.novoLancamento).length,
-      media,
-    };
-  }, [produtos]);
+    }),
+    [produtos]
+  );
 
   const salvarPreco = (id) => {
     atualizarProduto(id, { preco: parsePreco(precoTemp) });
@@ -124,11 +125,10 @@ const PainelProdutos = ({ onNovo, onEditar }) => {
         </button>
       </header>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-7">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-7">
         <CartaoMetrica icone={<FaTags />} rotulo="No catálogo" valor={<Numero valor={stats.total} />} destaque />
         <CartaoMetrica icone={<FaBoxOpen />} rotulo="Esgotadas" valor={<Numero valor={stats.esgotadas} />} />
-        <CartaoMetrica icone={<FaBolt />} rotulo="Novidades" valor={<Numero valor={stats.novidades} />} />
-        <CartaoMetrica icone={<FaStar />} rotulo="Ticket médio" valor={<Numero valor={stats.media} decimais={2} prefixo="R$ " />} />
+        <CartaoMetrica icone={<FaBolt />} rotulo="Novidades" valor={<Numero valor={stats.novidades} />} largo />
       </div>
 
       {/* filtros */}

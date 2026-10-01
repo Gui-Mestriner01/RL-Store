@@ -30,6 +30,7 @@ const PainelConfig = () => {
     verificarSenha,
     definirSenha,
     semSenhaDefinida,
+    senhaNoCodigo,
     senhaEmFormatoAntigo,
     avisar,
   } = useStore();
@@ -168,8 +169,32 @@ const PainelConfig = () => {
 
           <Bloco
             titulo="Acesso ao painel"
-            descricao="A senha é guardada como hash (PBKDF2) neste navegador — nunca em texto puro, nem no código do site."
+            descricao={
+              senhaNoCodigo
+                ? 'A senha do painel é a mesma em qualquer navegador ou celular. Ela vem do projeto, como hash — nunca em texto puro.'
+                : 'A senha é guardada como hash (PBKDF2) neste navegador — nunca em texto puro, nem no código do site.'
+            }
           >
+            {senhaNoCodigo ? (
+              <div className="flex gap-3 bg-sand border border-line rounded-xl p-4">
+                <FaKey className="text-rose shrink-0 mt-0.5 text-sm" />
+                <div className="text-[12px] text-ink leading-relaxed">
+                  <p className="mb-2">
+                    Esta loja usa <strong>uma senha só</strong>, válida em todos os
+                    aparelhos. Para trocá-la, rode no projeto:
+                  </p>
+                  <code className="block bg-cream border border-line rounded-lg px-3 py-2 text-[11px] text-rosedark mb-2">
+                    npm run senha
+                  </code>
+                  <p className="text-muted text-[11px]">
+                    O comando pede a nova senha, grava só o hash em
+                    <span className="text-ink"> src/data/acesso.js</span> e aí é só
+                    publicar o site de novo.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <>
             {(semSenhaDefinida || senhaEmFormatoAntigo) && (
               <div className="flex gap-3 bg-blush/40 border border-line rounded-xl p-4 mb-5">
                 <FaShieldAlt className="text-rose shrink-0 mt-0.5 text-sm" />
@@ -228,11 +253,13 @@ const PainelConfig = () => {
 
               <p className="text-[11px] text-muted mt-3 leading-relaxed">
                 Guarde a senha num lugar seguro: como não há servidor, não existe
-                recuperação. Esquecendo, dá para voltar à senha de fábrica
-                limpando os dados do site no navegador — o que também apaga o
-                catálogo, então mantenha um backup.
+                recuperação. Esquecendo, dá para começar de novo limpando os dados
+                do site no navegador — o que também apaga o catálogo, então
+                mantenha um backup.
               </p>
             </form>
+              </>
+            )}
           </Bloco>
 
           <div className="flex gap-3 mb-6">
