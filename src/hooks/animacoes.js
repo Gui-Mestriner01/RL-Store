@@ -7,50 +7,90 @@ const semMovimento = () =>
 /**
  * Revela os elementos marcados com data-revelar quando eles entram na tela,
  * em cascata: cada irmão espera um pouquinho mais que o anterior.
- * Passe uma dependência (ex.: a lista filtrada) para reanimar quando ela mudar.
+ *
+ * Também fica de olho no que aparece depois (troca de filtro, busca, "ver
+ * mais"): todo elemento novo é registrado automaticamente, senão ele nasceria
+ * transparente e nunca apareceria.
  */
 export function useRevelar(dependencia) {
   useEffect(() => {
-    const alvos = Array.from(document.querySelectorAll('[data-revelar]:not(.revelado)'));
-    if (!alvos.length) return;
+    const revelar = (alvo) => {
+      const grupo = alvo.parentElement;
+      const irmaos = grupo
+        ? Array.from(grupo.querySelectorAll(':scope > [data-revelar]'))
+        : [];
+      const indice = Math.max(0, irmaos.indexOf(alvo));
+      alvo.style.setProperty('--atraso', `${Math.min(indice, 7) * 75}ms`);
+      alvo.classList.add('revelado');
+      alvo.addEventListener(
+        'animationend',
+        () => alvo.classList.add('revelar-pronto'),
+        { once: true }
+      );
+    };
 
+    const pendentes = () =>
+      Array.from(document.querySelectorAll('[data-revelar]:not(.revelado)'));
+
+    // Sem animação (ou sem suporte): tudo aparece na hora, inclusive o que
+    // for criado depois.
     if (semMovimento() || !('IntersectionObserver' in window)) {
-      alvos.forEach((a) => a.classList.add('revelado'));
-      return;
+      const revelarTudo = () => pendentes().forEach((a) => a.classList.add('revelado'));
+      revelarTudo();
+      const vigia = new MutationObserver(revelarTudo);
+      vigia.observe(document.body, { childList: true, subtree: true });
+      return () => vigia.disconnect();
     }
 
     const observador = new IntersectionObserver(
       (entradas) => {
         entradas.forEach((entrada) => {
           if (!entrada.isIntersecting) return;
-          const alvo = entrada.target;
-          const grupo = alvo.parentElement;
-          const irmaos = grupo
-            ? Array.from(grupo.querySelectorAll(':scope > [data-revelar]'))
-            : [];
-          const indice = Math.max(0, irmaos.indexOf(alvo));
-          alvo.style.setProperty('--atraso', `${Math.min(indice, 7) * 75}ms`);
-          alvo.classList.add('revelado');
-          alvo.addEventListener(
-            'animationend',
-            () => alvo.classList.add('revelar-pronto'),
-            { once: true }
-          );
-          observador.unobserve(alvo);
+          revelar(entrada.target);
+          observador.unobserve(entrada.target);
         });
       },
       { threshold: 0.1, rootMargin: '0px 0px -60px 0px' }
     );
 
-    alvos.forEach((alvo) => observador.observe(alvo));
+    let resgate = null;
+    const registrar = () => {
+      const novos = pendentes();
+      if (!novos.length) return;
+      novos.forEach((alvo) => observador.observe(alvo));
 
-    // rede de segurança: nada fica invisível se o observador falhar
-    const resgate = setTimeout(() => {
-      alvos.forEach((alvo) => alvo.classList.add('revelado'));
-    }, 2500);
+      // Rede de segurança: se em pouco mais de um segundo algum elemento que
+      // já está na área visível continuar escondido, mostra assim mesmo.
+      clearTimeout(resgate);
+      resgate = setTimeout(() => {
+        pendentes().forEach((alvo) => {
+          const caixa = alvo.getBoundingClientRect();
+          const naTela = caixa.top < window.innerHeight && caixa.bottom > -40;
+          if (naTela) {
+            revelar(alvo);
+            observador.unobserve(alvo);
+          }
+        });
+      }, 1200);
+    };
+
+    registrar();
+
+    // Observa o que o React montar depois (filtros, busca, paginação...).
+    let agendado = null;
+    const vigia = new MutationObserver(() => {
+      if (agendado !== null) return;
+      agendado = requestAnimationFrame(() => {
+        agendado = null;
+        registrar();
+      });
+    });
+    vigia.observe(document.body, { childList: true, subtree: true });
 
     return () => {
       clearTimeout(resgate);
+      if (agendado !== null) cancelAnimationFrame(agendado);
+      vigia.disconnect();
       observador.disconnect();
     };
   }, [dependencia]);
