@@ -4,3 +4,5 @@ Allow: /
 
 # O painel administrativo abre em #/admin. Buscadores não leem o trecho
 # depois do "#", e a própria página marca noindex quando o painel está aberto.
+
+Sitemap: https://moccasin-wombat-163983.hostingersite.com/sitemap.xml

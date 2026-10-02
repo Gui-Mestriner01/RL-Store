@@ -9,7 +9,7 @@ import {
   FaCheckCircle,
 } from 'react-icons/fa';
 import { useStore } from '../store/StoreContext';
-import { baixarArquivo, dataHoje } from '../lib/utils';
+import { baixarArquivo, dataHoje, formatarTamanho } from '../lib/utils';
 
 const Cartao = ({ titulo, texto, children, perigo }) => (
   <div
@@ -38,6 +38,7 @@ const PainelBackup = () => {
     montarPublicacao,
     descartarRascunho,
     publicado,
+    espaco,
   } = useStore();
   const inputArquivo = useRef(null);
   const [confirmando, setConfirmando] = useState(false);
@@ -198,6 +199,34 @@ const PainelBackup = () => {
             </ol>
           </div>
         </div>
+      </div>
+
+      <div className="bg-cream border border-line rounded-2xl p-5 md:p-6 mb-4">
+        <div className="flex items-baseline justify-between gap-3 mb-2">
+          <h3 className="text-ink font-semibold text-[15px]">Espaço do navegador</h3>
+          <span
+            className={`text-[12px] font-semibold ${
+              espaco.porcentagem > 75 ? 'text-red-600' : 'text-body'
+            }`}
+          >
+            {formatarTamanho(espaco.usado)} de ~5 MB
+          </span>
+        </div>
+
+        <div className="h-2 rounded-full bg-sand overflow-hidden mb-3">
+          <div
+            className={`h-full rounded-full transition-all duration-500 ${
+              espaco.porcentagem > 75 ? 'bg-red-500' : 'bg-rose'
+            }`}
+            style={{ width: `${Math.max(2, espaco.porcentagem)}%` }}
+          />
+        </div>
+
+        <p className="text-[12px] text-body leading-relaxed text-pretty">
+          {espaco.porcentagem > 75
+            ? 'Está quase cheio. Publique o catálogo, exporte um backup e apague peças antigas — cadastros novos podem ser recusados.'
+            : 'As fotos ficam guardadas aqui até você publicar. Cada foto ocupa algumas centenas de KB, então cabem mais ou menos 12 fotos no total.'}
+        </p>
       </div>
 
       <Cartao

@@ -5,11 +5,20 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 import { PRODUTOS_SEED, CONFIG_PADRAO } from '../data/seed';
 import { ACESSO_PADRAO } from '../data/acesso';
-import { load, save, uid, parsePreco, midia, slugify } from '../lib/utils';
+import {
+  load,
+  save,
+  uid,
+  parsePreco,
+  midia,
+  slugify,
+  medirArmazenamento,
+} from '../lib/utils';
 import {
   conferirSenha,
   criarRegistroSenha,
@@ -142,6 +151,7 @@ export function StoreProvider({ children }) {
         // É o que fecha o ciclo "exportei no painel → subi → todos veem igual".
         if (versao > baseLocal) {
           setProdutos(lista);
+          save(CHAVES.produtos, lista);
           setConfig((atual) => ({ ...atual, ...configPublicada, acesso: atual.acesso }));
           save(CHAVES.baseVersao, versao);
         }
@@ -158,12 +168,13 @@ export function StoreProvider({ children }) {
   }, []);
 
   /* ---------------- toasts ---------------- */
-  const avisar = useCallback((mensagem, tipo = 'sucesso') => {
+  const avisar = useCallback((mensagem, tipo = 'sucesso', acao = null) => {
     const id = uid();
-    setAvisos((atual) => [...atual, { id, mensagem, tipo }]);
-    setTimeout(() => {
-      setAvisos((atual) => atual.filter((a) => a.id !== id));
-    }, 3200);
+    setAvisos((atual) => [...atual, { id, mensagem, tipo, acao }]);
+    setTimeout(
+      () => setAvisos((atual) => atual.filter((a) => a.id !== id)),
+      acao ? 9000 : 3200
+    );
   }, []);
 
   const fecharAviso = useCallback((id) => {
@@ -171,28 +182,45 @@ export function StoreProvider({ children }) {
   }, []);
 
   /* ---------------- persistência ---------------- */
-  const persistirProdutos = useCallback(
-    (lista) => {
-      const resultado = save(CHAVES.produtos, lista);
+
+  // quanto do armazenamento do navegador já foi usado
+  const [espaco, setEspaco] = useState(() => medirArmazenamento());
+
+  // espelho do catálogo para montar a nova versão antes de gravar
+  const produtosRef = useRef(produtos);
+  useEffect(() => {
+    produtosRef.current = produtos;
+  }, [produtos]);
+
+  /**
+   * Altera o catálogo APENAS se a gravação der certo.
+   * Antes, a peça entrava na tela e sumia no F5 quando a memória estava
+   * cheia — a cliente via "adicionada" e perdia tudo em silêncio.
+   */
+  const aplicarNoCatalogo = useCallback(
+    (transformar) => {
+      const anterior = produtosRef.current;
+      const nova = transformar(anterior);
+      const resultado = save(CHAVES.produtos, nova);
+
       if (!resultado.ok) {
-        // fora do ciclo de render para não encadear atualizações de estado
-        setTimeout(
-          () =>
-            avisar(
-              'Memória do navegador cheia. Use fotos menores ou exporte um backup.',
-              'erro'
-            ),
-          0
+        const { porcentagem } = medirArmazenamento();
+        avisar(
+          `Não deu para salvar: a memória do navegador está cheia (${Math.round(
+            porcentagem
+          )}%). Publique o catálogo, exporte um backup e apague peças antigas antes de cadastrar novas.`,
+          'erro'
         );
+        return false;
       }
-      return resultado.ok;
+
+      produtosRef.current = nova;
+      setProdutos(nova);
+      setEspaco(medirArmazenamento());
+      return true;
     },
     [avisar]
   );
-
-  useEffect(() => {
-    persistirProdutos(produtos);
-  }, [produtos, persistirProdutos]);
 
   useEffect(() => {
     save(CHAVES.config, config);
@@ -210,16 +238,18 @@ export function StoreProvider({ children }) {
   const criarProduto = useCallback(
     (dados) => {
       const novo = normalizarProduto({ ...dados, id: dados.id || uid() });
-      setProdutos((atual) => [novo, ...atual]);
+      // só avisa que entrou se realmente couber e for gravada
+      const salvou = aplicarNoCatalogo((atual) => [novo, ...atual]);
+      if (!salvou) return null;
       avisar(`"${novo.nome}" foi adicionada ao catálogo.`);
       return novo;
     },
-    [avisar]
+    [aplicarNoCatalogo, avisar]
   );
 
   const atualizarProduto = useCallback(
     (id, dados) => {
-      setProdutos((atual) =>
+      const salvou = aplicarNoCatalogo((atual) =>
         atual.map((p) =>
           p.id === id
             ? normalizarProduto({
@@ -231,24 +261,44 @@ export function StoreProvider({ children }) {
             : p
         )
       );
-      avisar('Alterações salvas.');
+      if (salvou) avisar('Alterações salvas.');
+      return salvou;
     },
-    [avisar]
+    [aplicarNoCatalogo, avisar]
   );
 
   const removerProduto = useCallback(
     (id) => {
-      setProdutos((atual) => atual.filter((p) => p.id !== id));
+      const peca = produtosRef.current.find((p) => p.id === id);
+      const posicao = produtosRef.current.findIndex((p) => p.id === id);
+      if (!peca) return false;
+
+      const salvou = aplicarNoCatalogo((atual) => atual.filter((p) => p.id !== id));
+      if (!salvou) return false;
+
       setFavoritos((atual) => atual.filter((f) => f !== String(id)));
       setSacola((atual) => atual.filter((i) => i.produtoId !== id));
-      avisar('Peça removida do catálogo.', 'aviso');
+
+      // dá para voltar atrás: a peça volta para o mesmo lugar da lista
+      avisar(`"${peca.nome}" foi removida.`, 'aviso', {
+        rotulo: 'Desfazer',
+        aoClicar: () => {
+          const voltou = aplicarNoCatalogo((atual) => {
+            const copia = [...atual];
+            copia.splice(Math.max(0, posicao), 0, peca);
+            return copia;
+          });
+          if (voltou) avisar(`"${peca.nome}" voltou para o catálogo.`);
+        },
+      });
+      return true;
     },
-    [avisar]
+    [aplicarNoCatalogo, avisar]
   );
 
   const alternarCampo = useCallback(
     (id, campo) => {
-      setProdutos((atual) =>
+      aplicarNoCatalogo((atual) =>
         atual.map((p) =>
           p.id === id
             ? { ...p, [campo]: !p[campo], atualizadoEm: new Date().toISOString() }
@@ -256,32 +306,35 @@ export function StoreProvider({ children }) {
         )
       );
     },
-    []
+    [aplicarNoCatalogo]
   );
 
-  const moverProduto = useCallback((id, direcao) => {
-    setProdutos((atual) => {
-      const indice = atual.findIndex((p) => p.id === id);
-      const destino = indice + direcao;
-      if (indice < 0 || destino < 0 || destino >= atual.length) return atual;
-      const copia = [...atual];
-      [copia[indice], copia[destino]] = [copia[destino], copia[indice]];
-      return copia;
-    });
-  }, []);
+  const moverProduto = useCallback(
+    (id, direcao) => {
+      aplicarNoCatalogo((atual) => {
+        const indice = atual.findIndex((p) => p.id === id);
+        const destino = indice + direcao;
+        if (indice < 0 || destino < 0 || destino >= atual.length) return atual;
+        const copia = [...atual];
+        [copia[indice], copia[destino]] = [copia[destino], copia[indice]];
+        return copia;
+      });
+    },
+    [aplicarNoCatalogo]
+  );
 
   const substituirCatalogo = useCallback(
     (lista, mensagem = 'Catálogo atualizado.') => {
-      setProdutos(lista.map(normalizarProduto));
-      avisar(mensagem);
+      const salvou = aplicarNoCatalogo(() => lista.map(normalizarProduto));
+      if (salvou) avisar(mensagem);
     },
-    [avisar]
+    [aplicarNoCatalogo, avisar]
   );
 
   const restaurarSeed = useCallback(() => {
-    setProdutos(PRODUTOS_SEED.map(normalizarProduto));
-    avisar('Catálogo original restaurado.', 'aviso');
-  }, [avisar]);
+    const salvou = aplicarNoCatalogo(() => PRODUTOS_SEED.map(normalizarProduto));
+    if (salvou) avisar('Catálogo original restaurado.', 'aviso');
+  }, [aplicarNoCatalogo, avisar]);
 
   /* ---------------- configurações ---------------- */
   const salvarConfig = useCallback(
@@ -362,6 +415,7 @@ export function StoreProvider({ children }) {
       const dados = await resposta.json();
       const lista = (dados.produtos || []).map(normalizarProduto);
       setProdutos(lista);
+      save(CHAVES.produtos, lista);
       if (dados.config) {
         setConfig((atual) => ({ ...atual, ...dados.config, acesso: atual.acesso }));
       }
@@ -482,6 +536,7 @@ export function StoreProvider({ children }) {
     salvarConfig,
     publicado,
     alteracoesNaoPublicadas,
+    espaco,
     montarPublicacao,
     descartarRascunho,
     verificarSenha,

@@ -16,20 +16,9 @@ A loja abre em `http://localhost:5173/`.
 
 Acesse `http://localhost:5173/#/admin` (ou o link **Área da loja** no rodapé).
 
-- **Senha única**, definida pelo comando abaixo e válida em qualquer
-  navegador ou celular que abrir o site:
-
-  ```bash
-  npm run senha
-  ```
-
-  O comando pergunta a nova senha, calcula o hash (PBKDF2-SHA256, 150 mil
-  iterações, com sal aleatório) e grava só o hash em `src/data/acesso.js`.
-  Depois é só `git commit`, `git push` e publicar o site de novo.
-  A senha em si não fica guardada em lugar nenhum.
-
-- Enquanto nenhuma senha for definida pelo comando, o painel pede que cada
-  navegador crie a sua no primeiro acesso (útil durante o desenvolvimento).
+- **Não existe senha no código.** No primeiro acesso o painel pede que você
+  crie uma; ela é guardada como hash PBKDF2-SHA256 (150 mil iterações, com sal
+  aleatório) no navegador, e pode ser trocada na aba **Loja**.
 - Layout de dashboard: menu lateral no PC, abas no celular.
 - **Peças**: adicionar, editar, excluir, marcar como esgotada, ocultar da loja,
   colocar em destaque, reordenar a vitrine e editar o preço direto na lista.
@@ -38,21 +27,44 @@ Acesse `http://localhost:5173/#/admin` (ou o link **Área da loja** no rodapé).
 - **Backup**: exportar/importar um `.json` com tudo e gerar um `produtos-seed.js`
   para deixar o catálogo fixo no código.
 
+## Publicar o catálogo (importante)
+
+O painel edita o catálogo no navegador de quem está mexendo. Para a alteração
+chegar na cliente, ela precisa ser **publicada**:
+
+1. Painel → aba **Publicar** → *Gerar produtos.json*.
+2. Suba esse arquivo na pasta do site na Hostinger, junto do `index.html`.
+3. Pronto: o site lê o `produtos.json` e todo mundo vê o mesmo catálogo.
+
+Enquanto houver algo editado e não publicado, o painel mostra um aviso na tela
+de peças. Depois de publicar, o aviso some sozinho.
+
+### Limites que vêm junto
+
+- As fotos ficam em `localStorage` até a publicação, e o navegador dá ~5 MB —
+  mais ou menos 12 fotos. O painel mostra uma barra de uso e **recusa** o
+  cadastro quando não cabe (sem adicionar a peça pela metade).
+- Trocar de computador ou limpar os dados do navegador apaga o rascunho local;
+  o que já foi publicado continua no ar. Exporte um backup de vez em quando.
+- Quem publica é você: a Rebeca edita, você sobe o arquivo. Para ela publicar
+  sozinha, o caminho é um banco (Supabase/Firebase no plano free) — aí o painel
+  grava no servidor e o site lê de lá.
+
 ## Segurança — o que dá e o que não dá
 
 O site é estático, sem servidor. Então:
 
 - A senha do painel **nunca** aparece em texto puro: nem no código, nem no
   backup, nem no `localStorage` — só o hash com sal.
-- Como o hash da senha única viaja junto com o site, use uma senha realmente
-  forte (12+ caracteres, misturando tipos). O comando `npm run senha` recusa
-  senhas fracas justamente por isso.
 - O login tem bloqueio progressivo (5 erros → 1 min, 8 → 5 min, 10 → 15 min) e
   a sessão do painel expira em 2 horas.
 - Backups importados passam por validação: só campos conhecidos entram, e as
   imagens precisam ser caminho relativo, `http(s)` ou base64 de imagem.
 - O painel se marca como `noindex` e o site vai com cabeçalhos de segurança no
   `public/.htaccess` (CSP, X-Frame-Options, Referrer-Policy, HSTS).
+- O login roda no navegador, então quem abrir o devtools consegue contornar.
+  Isso só muda de verdade com um servidor; por enquanto o painel não guarda
+  nada além do catálogo da loja.
 - **O que isso não é:** autenticação de verdade. Sem servidor, quem tem acesso
   ao computador e conhecimento técnico consegue mexer nos dados locais. Por
   isso o painel só edita o catálogo daquele navegador — não guarde dados de
@@ -78,13 +90,11 @@ Consequências práticas:
 ## Estrutura
 
 ```
-scripts/definir-senha.mjs   define a senha única do painel
 src/
 ├─ main.jsx                 roteador por hash (loja × /admin)
 ├─ App.jsx                  vitrine: busca, filtros, ordenação, paginação
 ├─ index.css                tokens de cor, fontes e animações (Tailwind v4)
 ├─ data/seed.js             catálogo inicial + configurações padrão
-├─ data/acesso.js           hash da senha do painel (gerado por npm run senha)
 ├─ lib/utils.js             preço, slug, storage, compressão de imagem
 ├─ store/StoreContext.jsx   estado global: produtos, config, favoritos, sacola
 ├─ hooks/useHashRoute.js    rota, trava de scroll, Esc, animação ao rolar

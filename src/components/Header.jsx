@@ -8,6 +8,7 @@ import {
   FaTimes,
 } from 'react-icons/fa';
 import { useStore } from '../store/StoreContext';
+import { useEscape } from '../hooks/useHashRoute';
 import { midia } from '../lib/utils';
 
 const montarRecados = (cidade) => [
@@ -69,6 +70,15 @@ const Header = ({ onAbrirFavoritos, onAbrirSacola, onAbrirBusca, busca, setBusca
     window.addEventListener('scroll', aoRolar, { passive: true });
     return () => window.removeEventListener('scroll', aoRolar);
   }, []);
+
+  // fechar a busca limpa o termo: senão o catálogo seguia filtrado e a
+  // pessoa via uma seção vazia sem entender o motivo
+  const fecharBusca = () => {
+    setBuscaAberta(false);
+    if (busca) setBusca('');
+  };
+
+  useEscape(fecharBusca, buscaAberta);
 
   const irPara = (id) =>
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
@@ -136,10 +146,13 @@ const Header = ({ onAbrirFavoritos, onAbrirSacola, onAbrirBusca, busca, setBusca
             <AcaoIcone
               rotulo={buscaAberta ? 'Fechar busca' : 'Buscar peças'}
               onClick={() => {
-                const abrindo = !buscaAberta;
-                setBuscaAberta(abrindo);
+                if (buscaAberta) {
+                  fecharBusca();
+                  return;
+                }
+                setBuscaAberta(true);
                 // abrindo a busca, as gavetas saem da frente
-                if (abrindo) onAbrirBusca?.();
+                onAbrirBusca?.();
               }}
             >
               {buscaAberta ? <FaTimes /> : <FaSearch className="text-[15px]" />}
@@ -148,7 +161,7 @@ const Header = ({ onAbrirFavoritos, onAbrirSacola, onAbrirBusca, busca, setBusca
             <AcaoIcone
               rotulo="Meus favoritos"
               onClick={() => {
-                setBuscaAberta(false);
+                fecharBusca();
                 onAbrirFavoritos();
               }}
               contador={favoritos.length}
@@ -159,7 +172,7 @@ const Header = ({ onAbrirFavoritos, onAbrirSacola, onAbrirBusca, busca, setBusca
             <AcaoIcone
               rotulo="Minha sacola"
               onClick={() => {
-                setBuscaAberta(false);
+                fecharBusca();
                 onAbrirSacola();
               }}
               contador={qtdSacola}
@@ -205,7 +218,7 @@ const Header = ({ onAbrirFavoritos, onAbrirSacola, onAbrirBusca, busca, setBusca
                 </button>
               )}
               <button
-                onClick={() => setBuscaAberta(false)}
+                onClick={fecharBusca}
                 aria-label="Fechar busca"
                 className="w-8 h-8 rounded-full flex items-center justify-center text-muted hover:text-ink hover:bg-blush/50 transition-colors"
               >

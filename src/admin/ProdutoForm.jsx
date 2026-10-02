@@ -176,11 +176,36 @@ const ProdutoForm = ({ produto, onFechar }) => {
       return;
     }
 
+    const preco = parsePreco(dados.preco);
+    const precoAntigo = dados.precoAntigo ? parsePreco(dados.precoAntigo) : null;
+
+    if (preco < 0) {
+      avisar('O preço não pode ser negativo.', 'erro');
+      return;
+    }
+    if (preco === 0) {
+      avisar('Coloque o preço da peça antes de salvar.', 'erro');
+      return;
+    }
+    if (precoAntigo !== null) {
+      if (precoAntigo < 0) {
+        avisar('O preço antigo não pode ser negativo.', 'erro');
+        return;
+      }
+      if (precoAntigo <= preco) {
+        avisar(
+          'O preço antigo precisa ser maior que o preço atual — é ele que mostra o desconto.',
+          'erro'
+        );
+        return;
+      }
+    }
+
     const carga = {
       ...dados,
       nome: dados.nome.trim(),
-      preco: parsePreco(dados.preco),
-      precoAntigo: dados.precoAntigo ? parsePreco(dados.precoAntigo) : null,
+      preco,
+      precoAntigo,
       categoria: (novaCategoria.trim() || dados.categoria || 'Outros').trim(),
     };
 
@@ -190,9 +215,12 @@ const ProdutoForm = ({ produto, onFechar }) => {
     onFechar();
   };
 
-  /* -------- prévia -------- */
+  /* -------- prévia e validação -------- */
   const precoNumero = parsePreco(dados.preco);
   const precoAntigoNumero = dados.precoAntigo ? parsePreco(dados.precoAntigo) : 0;
+  const precoInvalido = dados.preco !== '' && precoNumero <= 0;
+  const precoAntigoInvalido =
+    dados.precoAntigo !== '' && precoAntigoNumero > 0 && precoAntigoNumero <= precoNumero;
   const desconto =
     precoAntigoNumero > precoNumero && precoNumero > 0
       ? Math.round((1 - precoNumero / precoAntigoNumero) * 100)
@@ -311,23 +339,35 @@ const ProdutoForm = ({ produto, onFechar }) => {
                     />
                   </Campo>
 
-                  <Campo rotulo="Preço (R$)">
+                  <Campo
+                    rotulo="Preço (R$)"
+                    dica={precoInvalido ? '⚠ Informe um valor maior que zero.' : undefined}
+                  >
                     <input
                       value={dados.preco}
                       onChange={(e) => mudar('preco', e.target.value)}
                       inputMode="decimal"
                       placeholder="94,90"
-                      className={entrada}
+                      aria-invalid={precoInvalido}
+                      className={`${entrada} ${precoInvalido ? 'border-red-400' : ''}`}
                     />
                   </Campo>
 
-                  <Campo rotulo="Preço antigo" dica="Preencha para mostrar o selo de desconto.">
+                  <Campo
+                    rotulo="Preço antigo"
+                    dica={
+                      precoAntigoInvalido
+                        ? '⚠ Precisa ser maior que o preço atual.'
+                        : 'Preencha para mostrar o selo de desconto.'
+                    }
+                  >
                     <input
                       value={dados.precoAntigo}
                       onChange={(e) => mudar('precoAntigo', e.target.value)}
                       inputMode="decimal"
                       placeholder="129,90"
-                      className={entrada}
+                      aria-invalid={precoAntigoInvalido}
+                      className={`${entrada} ${precoAntigoInvalido ? 'border-red-400' : ''}`}
                     />
                   </Campo>
                 </div>
@@ -613,7 +653,8 @@ const ProdutoForm = ({ produto, onFechar }) => {
           </button>
           <button
             type="submit"
-            className="flex-[2] py-3.5 rounded-xl bg-ink text-cream text-[11px] font-bold tracking-[0.14em] uppercase hover:bg-rosedark transition-colors"
+            disabled={precoInvalido || precoAntigoInvalido}
+            className="flex-[2] py-3.5 rounded-xl bg-ink text-cream text-[11px] font-bold tracking-[0.14em] uppercase hover:bg-rosedark transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {editando ? 'Salvar alterações' : 'Adicionar ao catálogo'}
           </button>

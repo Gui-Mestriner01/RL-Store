@@ -29,9 +29,18 @@ const HeroBanner = () => {
   const inicioFrase = palavras.slice(0, -2).join(' ');
   const fimFrase = palavras.slice(-2).join(' ');
 
+  // só conta categoria que realmente tem peça à venda
+  const categoriasComPeca = useMemo(
+    () =>
+      categorias.filter((c) =>
+        produtosVisiveis.some((p) => p.categoria.toLowerCase() === c.toLowerCase())
+      ).length,
+    [categorias, produtosVisiveis]
+  );
+
   const numeros = [
     { valor: produtosVisiveis.length, rotulo: 'peças no catálogo' },
-    { valor: categorias.length, rotulo: 'categorias' },
+    { valor: categoriasComPeca, rotulo: categoriasComPeca === 1 ? 'categoria' : 'categorias' },
     { valor: 100, sufixo: '%', rotulo: 'atendimento humano' },
   ];
 

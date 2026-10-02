@@ -21,6 +21,17 @@ const Toasts = () => {
           >
             <span className="shrink-0 opacity-90">{estilo.icone}</span>
             <p className="flex-1 leading-snug">{aviso.mensagem}</p>
+            {aviso.acao && (
+              <button
+                onClick={() => {
+                  aviso.acao.aoClicar();
+                  fecharAviso(aviso.id);
+                }}
+                className="shrink-0 px-3 py-1.5 rounded-lg bg-cream/20 text-[10px] font-bold tracking-[0.12em] uppercase hover:bg-cream/30 transition-colors"
+              >
+                {aviso.acao.rotulo}
+              </button>
+            )}
             <button
               onClick={() => fecharAviso(aviso.id)}
               aria-label="Fechar aviso"

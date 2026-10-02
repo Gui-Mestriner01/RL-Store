@@ -113,3 +113,33 @@ export const midia = (caminho = '') => {
   if (/^(https?:|data:|blob:|\.\/)/.test(caminho)) return caminho;
   return `${BASE.endsWith('/') ? BASE : BASE + '/'}${caminho.replace(/^\//, '')}`;
 };
+
+/**
+ * Quanto do armazenamento do navegador já foi usado.
+ * O limite costuma ser ~5 MB por site; aqui a conta é por caracteres
+ * (cada um ocupa 2 bytes), suficiente para avisar antes de encher.
+ */
+export const medirArmazenamento = () => {
+  const LIMITE = 5 * 1024 * 1024;
+  let usado = 0;
+  try {
+    for (let i = 0; i < localStorage.length; i += 1) {
+      const chave = localStorage.key(i);
+      usado += ((localStorage.getItem(chave) || '').length + chave.length) * 2;
+    }
+  } catch {
+    return { usado: 0, limite: LIMITE, porcentagem: 0, disponivel: false };
+  }
+  return {
+    usado,
+    limite: LIMITE,
+    porcentagem: Math.min(100, (usado / LIMITE) * 100),
+    disponivel: true,
+  };
+};
+
+export const formatarTamanho = (bytes = 0) => {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};

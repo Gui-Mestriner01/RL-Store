@@ -14,6 +14,7 @@ import {
   FaEyeSlash,
   FaBolt,
   FaCloudUploadAlt,
+  FaExclamationTriangle,
 } from 'react-icons/fa';
 import { useStore } from '../store/StoreContext';
 import { formatarPreco, parsePreco } from '../lib/utils';
@@ -24,11 +25,14 @@ const Switch = ({ ativo, onClick, rotulo }) => (
     onClick={onClick}
     className="flex items-center gap-2.5 group"
     aria-pressed={ativo}
+    aria-label={`${rotulo}: ${ativo ? 'ligado' : 'desligado'}`}
     title={rotulo}
   >
     <span className="switch" data-on={ativo} />
+    {/* o rótulo fica sempre visível: no celular não existe hover para
+        descobrir qual chave é qual */}
     <span
-      className={`text-[11px] font-medium transition-colors hidden xl:inline ${
+      className={`text-[11px] font-medium transition-colors whitespace-nowrap ${
         ativo ? 'text-ink' : 'text-muted group-hover:text-body'
       }`}
     >
@@ -70,6 +74,7 @@ const PainelProdutos = ({ onNovo, onEditar, onPublicar }) => {
     produtos,
     categorias,
     alteracoesNaoPublicadas,
+    espaco,
     alternarCampo,
     removerProduto,
     atualizarProduto,
@@ -126,6 +131,24 @@ const PainelProdutos = ({ onNovo, onEditar, onPublicar }) => {
           <FaPlus className="text-[11px]" /> Nova peça
         </button>
       </header>
+
+      {espaco.porcentagem > 70 && (
+        <button
+          onClick={onPublicar}
+          className="w-full text-left flex items-start gap-3.5 bg-red-50 border border-red-200 rounded-2xl p-4 mb-3 hover:border-red-400 transition-colors"
+        >
+          <FaExclamationTriangle className="text-red-600 shrink-0 mt-0.5" />
+          <span className="flex-1">
+            <span className="block text-[13px] font-semibold text-ink">
+              A memória do navegador está em {Math.round(espaco.porcentagem)}%
+            </span>
+            <span className="block text-[12px] text-body mt-0.5">
+              Publique o catálogo e apague peças antigas — perto de 100% os cadastros
+              novos são recusados.
+            </span>
+          </span>
+        </button>
+      )}
 
       {alteracoesNaoPublicadas && (
         <button
