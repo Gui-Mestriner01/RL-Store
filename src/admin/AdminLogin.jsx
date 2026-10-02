@@ -10,8 +10,7 @@ import {
 } from '../lib/seguranca';
 
 const AdminLogin = ({ onEntrar }) => {
-  const { config, produtos, verificarSenha, definirSenha, semSenhaDefinida, senhaNoCodigo } =
-    useStore();
+  const { config, produtos, verificarSenha, definirSenha, semSenhaDefinida } = useStore();
   const [senha, setSenha] = useState('');
   const [confirma, setConfirma] = useState('');
   const [erro, setErro] = useState('');
@@ -88,7 +87,12 @@ const AdminLogin = ({ onEntrar }) => {
         <div className="absolute -top-24 -left-20 w-80 h-80 rounded-full bg-rose/25 blur-3xl" />
         <div className="absolute bottom-0 right-0 w-96 h-96 rounded-full bg-blush/10 blur-3xl" />
 
-        <img src={midia('logo.png')} alt="" className="h-14 object-contain relative brightness-0 invert opacity-90" />
+        <img
+          src={midia('logo.png')}
+          alt=""
+          aria-hidden="true"
+          className="h-14 object-contain relative brightness-0 invert opacity-90"
+        />
 
         <div className="relative">
           <p className="eyebrow text-blush mb-4">Painel administrativo</p>
@@ -125,7 +129,12 @@ const AdminLogin = ({ onEntrar }) => {
           onSubmit={semSenhaDefinida ? criar : enviar}
           className="w-full max-w-sm animate-fade-up"
         >
-          <img src={midia('logo.png')} alt="" className="h-16 mx-auto mb-8 object-contain lg:hidden" />
+          <img
+            src={midia('logo.png')}
+            alt=""
+            aria-hidden="true"
+            className="h-16 mx-auto mb-8 object-contain lg:hidden"
+          />
 
           <div className="inline-flex items-center gap-2 text-rose mb-3">
             <FaLock className="text-[11px]" />
@@ -219,11 +228,7 @@ const AdminLogin = ({ onEntrar }) => {
             <FaArrowLeft className="text-[9px]" /> Voltar para a loja
           </a>
 
-          <p className="text-[11px] text-muted/80 mt-8 text-center leading-relaxed">
-            {senhaNoCodigo
-              ? 'A mesma senha vale em qualquer aparelho, guardada como hash (PBKDF2), nunca em texto puro. Como o site não tem servidor, isso protege contra acesso casual — não guarde dados sensíveis aqui.'
-              : 'A senha é guardada como hash no seu navegador (PBKDF2), nunca em texto puro. Como o site não tem servidor, isso protege contra acesso casual — não guarde dados sensíveis aqui.'}
-          </p>
+
         </form>
       </div>
     </div>

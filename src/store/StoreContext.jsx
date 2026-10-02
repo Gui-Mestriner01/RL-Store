@@ -9,7 +9,7 @@ import {
 } from 'react';
 import { PRODUTOS_SEED, CONFIG_PADRAO } from '../data/seed';
 import { ACESSO_PADRAO } from '../data/acesso';
-import { load, save, uid, parsePreco, midia } from '../lib/utils';
+import { load, save, uid, parsePreco, midia, slugify } from '../lib/utils';
 import {
   conferirSenha,
   criarRegistroSenha,
@@ -20,6 +20,7 @@ import {
 
 const CHAVES = {
   produtos: 'rl_produtos_v2',
+  baseVersao: 'rl_base_versao',
   config: 'rl_config_v2',
   favoritos: 'rl_favoritos_v2',
   sacola: 'rl_sacola_v2',
@@ -28,9 +29,14 @@ const CHAVES = {
 const StoreContext = createContext(null);
 
 /** Garante que todo produto tenha a mesma "forma", venha de onde vier. */
-export const normalizarProduto = (bruto = {}) => ({
-  id: textoLimpo(bruto.id, 60) || uid(),
-  nome: textoLimpo(bruto.nome, 120) || 'Peça sem nome',
+export const normalizarProduto = (bruto = {}) => {
+  const id = textoLimpo(bruto.id, 60) || uid();
+  const nome = textoLimpo(bruto.nome, 120) || 'Peça sem nome';
+  return {
+  id,
+  nome,
+  // endereço próprio da peça, usado em #/peca/<slug>
+  slug: slugify(bruto.slug || nome) || slugify(id),
   preco: Math.max(0, parsePreco(bruto.preco)),
   precoAntigo:
     bruto.precoAntigo === null || bruto.precoAntigo === undefined || bruto.precoAntigo === ''
@@ -38,6 +44,7 @@ export const normalizarProduto = (bruto = {}) => ({
       : Math.max(0, parsePreco(bruto.precoAntigo)),
   categoria: textoLimpo(bruto.categoria, 40) || 'Outros',
   descricao: textoLimpo(bruto.descricao, 1200),
+  medidas: textoLimpo(bruto.medidas, 400),
   aviso: textoLimpo(bruto.aviso, 300),
   // só entram caminhos de imagem reconhecidos (relativo, http(s) ou base64)
   imagens: Array.isArray(bruto.imagens)
@@ -62,7 +69,27 @@ export const normalizarProduto = (bruto = {}) => ({
   ativo: bruto.ativo === undefined ? true : Boolean(bruto.ativo),
   criadoEm: bruto.criadoEm || new Date().toISOString(),
   atualizadoEm: bruto.atualizadoEm || new Date().toISOString(),
-});
+  };
+};
+
+/** Resumo estável do catálogo, para saber se há algo ainda não publicado. */
+const assinarCatalogo = (produtos = [], config = {}) =>
+  JSON.stringify({
+    produtos: produtos.map((p) => ({ ...p, atualizadoEm: undefined })),
+    loja: {
+      nomeLoja: config.nomeLoja,
+      frase: config.frase,
+      subtitulo: config.subtitulo,
+      whatsapp: config.whatsapp,
+      instagram: config.instagram,
+      cidade: config.cidade,
+      categorias: config.categorias,
+      fotosInstagram: config.fotosInstagram,
+      pagamento: config.pagamento,
+      entrega: config.entrega,
+      troca: config.troca,
+    },
+  });
 
 export function StoreProvider({ children }) {
   const [produtos, setProdutos] = useState(() =>
@@ -81,6 +108,54 @@ export function StoreProvider({ children }) {
   );
   const [sacola, setSacola] = useState(() => load(CHAVES.sacola, []));
   const [avisos, setAvisos] = useState([]);
+  // o que está publicado em produtos.json — ou seja, o que a cliente vê
+  const [publicado, setPublicado] = useState(() => ({
+    versao: load(CHAVES.baseVersao, 0),
+    assinatura: null,
+    existe: false,
+  }));
+
+  /* -------- catálogo publicado (produtos.json) -------- */
+  useEffect(() => {
+    let cancelado = false;
+
+    const buscar = async () => {
+      try {
+        const resposta = await fetch(`${midia('produtos.json')}?v=${Date.now()}`, {
+          cache: 'no-store',
+        });
+        if (!resposta.ok) return;
+        const dados = await resposta.json();
+        if (cancelado || !dados || !Array.isArray(dados.produtos)) return;
+
+        const lista = dados.produtos.map(normalizarProduto);
+        const versao = Number(dados.versao) || 0;
+        const baseLocal = load(CHAVES.baseVersao, 0);
+        const configPublicada =
+          dados.config && typeof dados.config === 'object' ? dados.config : {};
+        const assinatura = assinarCatalogo(lista, {
+          ...CONFIG_PADRAO,
+          ...configPublicada,
+        });
+
+        // Arquivo mais novo que a base do rascunho local: o publicado manda.
+        // É o que fecha o ciclo "exportei no painel → subi → todos veem igual".
+        if (versao > baseLocal) {
+          setProdutos(lista);
+          setConfig((atual) => ({ ...atual, ...configPublicada, acesso: atual.acesso }));
+          save(CHAVES.baseVersao, versao);
+        }
+        setPublicado({ versao, assinatura, existe: true });
+      } catch {
+        /* nada publicado ainda: segue com o catálogo local */
+      }
+    };
+
+    buscar();
+    return () => {
+      cancelado = true;
+    };
+  }, []);
 
   /* ---------------- toasts ---------------- */
   const avisar = useCallback((mensagem, tipo = 'sucesso') => {
@@ -252,6 +327,51 @@ export function StoreProvider({ children }) {
     [avisar]
   );
 
+  /* -------- publicação do catálogo -------- */
+
+  const assinaturaAtual = useMemo(
+    () => assinarCatalogo(produtos, config),
+    [produtos, config]
+  );
+
+  /** Existe coisa editada aqui que a cliente ainda não vê? */
+  const alteracoesNaoPublicadas = publicado.existe
+    ? assinaturaAtual !== publicado.assinatura
+    : produtos.length > 0;
+
+  /** Monta o conteúdo do produtos.json que vai para a hospedagem. */
+  const montarPublicacao = useCallback(() => {
+    const limpo = { ...config };
+    delete limpo.acesso;
+    delete limpo.senhaAdmin;
+    return {
+      versao: Date.now(),
+      geradoEm: new Date().toISOString(),
+      config: limpo,
+      produtos,
+    };
+  }, [config, produtos]);
+
+  /** Volta para o catálogo que está publicado, descartando o rascunho. */
+  const descartarRascunho = useCallback(async () => {
+    try {
+      const resposta = await fetch(`${midia('produtos.json')}?v=${Date.now()}`, {
+        cache: 'no-store',
+      });
+      if (!resposta.ok) throw new Error('sem arquivo');
+      const dados = await resposta.json();
+      const lista = (dados.produtos || []).map(normalizarProduto);
+      setProdutos(lista);
+      if (dados.config) {
+        setConfig((atual) => ({ ...atual, ...dados.config, acesso: atual.acesso }));
+      }
+      save(CHAVES.baseVersao, Number(dados.versao) || 0);
+      avisar('Rascunho descartado: voltamos ao catálogo publicado.', 'aviso');
+    } catch {
+      avisar('Não encontrei um produtos.json publicado para voltar.', 'erro');
+    }
+  }, [avisar]);
+
   /* ---------------- favoritos ---------------- */
   const ehFavorito = useCallback(
     (id) => favoritos.includes(String(id)),
@@ -360,6 +480,10 @@ export function StoreProvider({ children }) {
     substituirCatalogo,
     restaurarSeed,
     salvarConfig,
+    publicado,
+    alteracoesNaoPublicadas,
+    montarPublicacao,
+    descartarRascunho,
     verificarSenha,
     definirSenha,
     semSenhaDefinida,

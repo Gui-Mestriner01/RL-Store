@@ -43,7 +43,8 @@ DirectoryIndex index.html
 Options -Indexes
 
 # arquivos que não deveriam ser servidos, caso escapem para o servidor
-<FilesMatch "(^\.|\.(json|md|log|lock|yml|yaml|sh|bak)$)">
+# produtos.json precisa ser servido: é ele que leva o catálogo para a cliente
+<FilesMatch "(^\.|^package.*\.json$|\.(md|log|lock|yml|yaml|sh|bak)$)">
   <IfModule mod_authz_core.c>
     Require all denied
   </IfModule>

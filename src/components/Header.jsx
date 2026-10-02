@@ -10,15 +10,15 @@ import {
 import { useStore } from '../store/StoreContext';
 import { midia } from '../lib/utils';
 
-const RECADOS = [
-  'Entrega local rápida',
+const montarRecados = (cidade) => [
+  `Entrega em ${cidade}`,
   'Atendimento pelo WhatsApp todos os dias',
   'Peças selecionadas a dedo',
   'Novidades toda semana',
 ];
 
 const AcaoIcone = ({ rotulo, onClick, href, children, contador = 0, escuro }) => {
-  const classe = `relative w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
+  const classe = `relative w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300 ${
     escuro
       ? 'text-cream hover:bg-cream/15'
       : 'text-ink hover:bg-blush/60 hover:-translate-y-0.5'
@@ -48,8 +48,9 @@ const AcaoIcone = ({ rotulo, onClick, href, children, contador = 0, escuro }) =>
   );
 };
 
-const Header = ({ onAbrirFavoritos, onAbrirSacola, busca, setBusca }) => {
+const Header = ({ onAbrirFavoritos, onAbrirSacola, onAbrirBusca, busca, setBusca }) => {
   const { config, favoritos, qtdSacola } = useStore();
+  const RECADOS = montarRecados(config.cidade);
   const [encolhido, setEncolhido] = useState(false);
   const [buscaAberta, setBuscaAberta] = useState(false);
   const [secao, setSecao] = useState('inicio');
@@ -134,16 +135,35 @@ const Header = ({ onAbrirFavoritos, onAbrirSacola, busca, setBusca }) => {
           <div className="flex items-center gap-0.5 md:gap-1">
             <AcaoIcone
               rotulo={buscaAberta ? 'Fechar busca' : 'Buscar peças'}
-              onClick={() => setBuscaAberta((v) => !v)}
+              onClick={() => {
+                const abrindo = !buscaAberta;
+                setBuscaAberta(abrindo);
+                // abrindo a busca, as gavetas saem da frente
+                if (abrindo) onAbrirBusca?.();
+              }}
             >
               {buscaAberta ? <FaTimes /> : <FaSearch className="text-[15px]" />}
             </AcaoIcone>
 
-            <AcaoIcone rotulo="Meus favoritos" onClick={onAbrirFavoritos} contador={favoritos.length}>
+            <AcaoIcone
+              rotulo="Meus favoritos"
+              onClick={() => {
+                setBuscaAberta(false);
+                onAbrirFavoritos();
+              }}
+              contador={favoritos.length}
+            >
               <FaHeart className="text-[15px]" />
             </AcaoIcone>
 
-            <AcaoIcone rotulo="Minha sacola" onClick={onAbrirSacola} contador={qtdSacola}>
+            <AcaoIcone
+              rotulo="Minha sacola"
+              onClick={() => {
+                setBuscaAberta(false);
+                onAbrirSacola();
+              }}
+              contador={qtdSacola}
+            >
               <FaShoppingBag className="text-[15px]" />
             </AcaoIcone>
 

@@ -17,8 +17,15 @@ const ProductCard = ({ product, onClick }) => {
       ? Math.round((1 - product.preco / product.precoAntigo) * 100)
       : 0;
 
+  // Com mais de uma cor ou tamanho, quem escolhe é a cliente: abre o detalhe.
+  const precisaEscolher = product.cores.length > 1 || product.tamanhos.length > 1;
+
   const adicionarRapido = (e) => {
     e.stopPropagation();
+    if (precisaEscolher) {
+      onClick();
+      return;
+    }
     adicionarNaSacola(product, {
       tamanho: product.tamanhos[0],
       cor: product.cores[0]?.nome,
@@ -106,7 +113,7 @@ const ProductCard = ({ product, onClick }) => {
             onClick={adicionarRapido}
             className="brilho absolute bottom-3.5 left-3.5 right-3.5 flex items-center justify-center gap-2 py-3 rounded-full bg-cream/95 text-ink text-[10px] font-bold tracking-[0.16em] uppercase opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 ease-out hover:bg-ink hover:text-cream sombra-alta"
           >
-            <FaShoppingBag className="text-[11px]" /> Adicionar
+            <FaShoppingBag className="text-[11px]" /> {precisaEscolher ? 'Escolher' : 'Adicionar'}
           </button>
         )}
 

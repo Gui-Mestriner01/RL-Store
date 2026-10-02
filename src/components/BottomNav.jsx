@@ -7,7 +7,7 @@ const rolarPara = (id) =>
 const ItemNav = ({ icone, rotulo, onClick, badge = 0 }) => (
   <button
     onClick={onClick}
-    className="relative flex flex-col items-center gap-1 text-body hover:text-ink transition-colors px-3 py-1"
+    className="relative flex flex-col items-center justify-center gap-1 text-body hover:text-ink transition-colors px-3 min-w-[56px] min-h-[44px]"
   >
     <span className="text-lg">{icone}</span>
     <span className="text-[10px] uppercase tracking-[0.1em]">{rotulo}</span>

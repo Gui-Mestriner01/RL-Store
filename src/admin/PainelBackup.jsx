@@ -1,5 +1,13 @@
 import { useRef, useState } from 'react';
-import { FaDownload, FaUpload, FaUndoAlt, FaCode, FaExclamationTriangle } from 'react-icons/fa';
+import {
+  FaDownload,
+  FaUpload,
+  FaUndoAlt,
+  FaCode,
+  FaExclamationTriangle,
+  FaCloudUploadAlt,
+  FaCheckCircle,
+} from 'react-icons/fa';
 import { useStore } from '../store/StoreContext';
 import { baixarArquivo, dataHoje } from '../lib/utils';
 
@@ -19,9 +27,26 @@ const botao =
   'w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl text-[11px] font-bold tracking-[0.14em] uppercase transition-colors';
 
 const PainelBackup = () => {
-  const { produtos, config, substituirCatalogo, salvarConfig, restaurarSeed, avisar } = useStore();
+  const {
+    produtos,
+    config,
+    substituirCatalogo,
+    salvarConfig,
+    restaurarSeed,
+    avisar,
+    alteracoesNaoPublicadas,
+    montarPublicacao,
+    descartarRascunho,
+    publicado,
+  } = useStore();
   const inputArquivo = useRef(null);
   const [confirmando, setConfirmando] = useState(false);
+
+  const publicarCatalogo = () => {
+    const conteudo = JSON.stringify(montarPublicacao(), null, 2);
+    baixarArquivo('produtos.json', conteudo);
+    avisar('produtos.json gerado. Agora é só subir na hospedagem.');
+  };
 
   const exportarJSON = () => {
     // o hash da senha não sai no backup
@@ -111,20 +136,68 @@ const PainelBackup = () => {
   return (
     <div className="animate-fade-in max-w-2xl">
       <header className="mb-7">
-        <p className="eyebrow mb-2">Segurança dos dados</p>
-        <h1 className="font-display text-[2.25rem] text-ink leading-none">Backup</h1>
+        <p className="eyebrow mb-2">Publicação e backup</p>
+        <h1 className="font-display text-[2.25rem] text-ink leading-none">Publicar</h1>
         <p className="text-body text-sm mt-2">
-          Guarde uma cópia do catálogo e leve suas alterações para o código.
+          Mande suas alterações para o site e guarde uma cópia de segurança.
         </p>
       </header>
 
-      <div className="flex gap-3.5 bg-blush/35 border border-line rounded-2xl p-5 mb-5">
-        <FaExclamationTriangle className="text-rose shrink-0 mt-0.5" />
-        <p className="text-[12px] text-ink leading-relaxed text-pretty">
-          O catálogo fica salvo na memória <strong>deste navegador</strong>. Se você trocar
-          de computador, limpar os dados do navegador ou publicar o site em outro
-          lugar, as alterações não vão junto — exporte um backup de vez em quando.
-        </p>
+      <div
+        className={`rounded-2xl p-5 mb-5 border ${
+          alteracoesNaoPublicadas ? 'bg-blush/40 border-rose/40' : 'bg-cream border-line'
+        }`}
+      >
+        <div className="flex gap-3.5">
+          {alteracoesNaoPublicadas ? (
+            <FaExclamationTriangle className="text-rose shrink-0 mt-0.5" />
+          ) : (
+            <FaCheckCircle className="text-green-700 shrink-0 mt-0.5" />
+          )}
+          <div className="flex-1">
+            <p className="text-[13px] font-semibold text-ink mb-1">
+              {alteracoesNaoPublicadas
+                ? 'Você tem alterações que a cliente ainda não vê'
+                : 'Tudo que você editou já está publicado'}
+            </p>
+            <p className="text-[12px] text-body leading-relaxed text-pretty">
+              {alteracoesNaoPublicadas
+                ? 'O que você edita aqui fica neste navegador até ser publicado. Gere o arquivo abaixo e suba na hospedagem para que ele apareça para quem acessa o site.'
+                : 'O catálogo deste painel é o mesmo que está no ar.'}
+            </p>
+
+            <div className="flex flex-wrap gap-2 mt-4">
+              <button
+                onClick={publicarCatalogo}
+                className={`${botao} ${
+                  alteracoesNaoPublicadas
+                    ? 'bg-ink text-cream hover:bg-rosedark'
+                    : 'bg-sand border border-line text-ink hover:border-rose'
+                }`}
+              >
+                <FaCloudUploadAlt className="text-sm" /> Gerar produtos.json
+              </button>
+
+              {alteracoesNaoPublicadas && publicado.existe && (
+                <button
+                  onClick={descartarRascunho}
+                  className={`${botao} bg-sand border border-line text-ink hover:border-rose`}
+                >
+                  <FaUndoAlt className="text-xs" /> Descartar e voltar ao publicado
+                </button>
+              )}
+            </div>
+
+            <ol className="text-[11px] text-muted mt-4 leading-relaxed list-decimal pl-4 space-y-1">
+              <li>Clique em <span className="text-ink">Gerar produtos.json</span>.</li>
+              <li>
+                Na Hostinger, abra o Gerenciador de Arquivos e coloque o arquivo na
+                pasta do site, junto do <span className="text-ink">index.html</span>.
+              </li>
+              <li>Pronto: todo mundo que abrir o site vê o catálogo novo.</li>
+            </ol>
+          </div>
+        </div>
       </div>
 
       <Cartao

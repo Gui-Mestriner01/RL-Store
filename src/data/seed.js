@@ -131,7 +131,7 @@ export const CONFIG_PADRAO = {
     'Peças selecionadas para realçar sua beleza e confiança todos os dias.',
   whatsapp: '5511972276750',
   instagram: 'rl.modastore',
-  cidade: 'Entrega local rápida',
+  cidade: 'Guararapes e região',
   categorias: CATEGORIAS_PADRAO,
   fotosInstagram: [
     '/roupas/insta1.jpg',
@@ -139,6 +139,10 @@ export const CONFIG_PADRAO = {
     '/roupas/insta3.jpg',
     '/roupas/insta4.jpg',
   ],
+  // Informações que a cliente mais pergunta no WhatsApp
+  pagamento: 'Pix, dinheiro ou cartão (combinamos no WhatsApp)',
+  entrega: 'Entrega em Guararapes e região; para outras cidades combinamos o envio',
+  troca: 'Troca em até 7 dias, com a peça sem uso e com etiqueta',
   // A senha do painel não mora aqui: ela é definida com `npm run senha`,
   // que grava só o hash em src/data/acesso.js.
   acesso: null,

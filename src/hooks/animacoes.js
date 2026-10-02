@@ -50,7 +50,7 @@ export function useRevelar(dependencia) {
           observador.unobserve(entrada.target);
         });
       },
-      { threshold: 0.1, rootMargin: '0px 0px -60px 0px' }
+      { threshold: 0.05, rootMargin: '0px 0px -20px 0px' }
     );
 
     let resgate = null;
@@ -59,8 +59,8 @@ export function useRevelar(dependencia) {
       if (!novos.length) return;
       novos.forEach((alvo) => observador.observe(alvo));
 
-      // Rede de segurança: se em pouco mais de um segundo algum elemento que
-      // já está na área visível continuar escondido, mostra assim mesmo.
+      // Rede de segurança: se um elemento que já está na área visível
+      // continuar escondido, mostra assim mesmo.
       clearTimeout(resgate);
       resgate = setTimeout(() => {
         pendentes().forEach((alvo) => {
@@ -71,7 +71,7 @@ export function useRevelar(dependencia) {
             observador.unobserve(alvo);
           }
         });
-      }, 1200);
+      }, 700);
     };
 
     registrar();

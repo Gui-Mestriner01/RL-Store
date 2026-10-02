@@ -26,6 +26,7 @@ const CORES_RAPIDAS = [
 
 const VAZIO = {
   nome: '',
+  medidas: '',
   preco: '',
   precoAntigo: '',
   categoria: '',
@@ -341,6 +342,19 @@ const ProdutoForm = ({ produto, onFechar }) => {
                   />
                 </Campo>
 
+                <Campo
+                  rotulo="Medidas"
+                  dica="A pergunta nº 1 da cliente. Ex.: Busto 88cm · Cintura 70cm · Comprimento 95cm"
+                >
+                  <textarea
+                    value={dados.medidas}
+                    onChange={(e) => mudar('medidas', e.target.value)}
+                    rows={2}
+                    placeholder="Busto 88cm · Cintura 70cm · Comprimento 95cm"
+                    className={`${entrada} resize-y`}
+                  />
+                </Campo>
+
                 <Campo rotulo="Aviso especial" dica="Aparece destacado na página da peça.">
                   <input
                     value={dados.aviso}
@@ -521,6 +535,7 @@ const ProdutoForm = ({ produto, onFechar }) => {
                       <img
                         src={dados.imagens[0]}
                         alt=""
+                        aria-hidden="true"
                         className={`w-full h-full object-cover ${dados.esgotado ? 'grayscale-[65%]' : ''}`}
                       />
                     ) : (

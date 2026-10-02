@@ -19,7 +19,17 @@ const CategoryFilter = ({
   busca,
 }) => {
   const { categorias, produtosVisiveis } = useStore();
-  const lista = ['Todos', ...categorias];
+
+  const temPeca = (categoria) =>
+    produtosVisiveis.some((p) => p.categoria.toLowerCase() === categoria.toLowerCase());
+
+  // categoria vazia não vira botão: só leva para uma tela sem nada
+  const lista = [
+    'Todos',
+    ...categorias.filter(
+      (c) => temPeca(c) || c.toLowerCase() === categoriaAtiva.toLowerCase()
+    ),
+  ];
 
   const contar = (categoria) =>
     categoria === 'Todos'
@@ -49,9 +59,7 @@ const CategoryFilter = ({
                 className={`shrink-0 inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-[10px] font-bold tracking-[0.16em] uppercase transition-all duration-300 border ${
                   ativa
                     ? 'bg-ink text-cream border-ink sombra-suave'
-                    : quantidade === 0
-                      ? 'bg-cream/50 border-line/60 text-muted/60 hover:border-rose'
-                      : 'bg-cream border-line text-body hover:border-rose hover:text-ink'
+                    : 'bg-cream border-line text-body hover:border-rose hover:text-ink'
                 }`}
               >
                 {categoria}

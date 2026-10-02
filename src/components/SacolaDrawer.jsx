@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { FaWhatsapp, FaTrashAlt, FaPlus, FaMinus, FaShoppingBag } from 'react-icons/fa';
 import Drawer from './Drawer';
 import { useStore } from '../store/StoreContext';
@@ -6,6 +7,7 @@ import { formatarPreco } from '../lib/utils';
 const SacolaDrawer = ({ aberto, onClose }) => {
   const { sacola, totalSacola, qtdSacola, mudarQtd, removerDaSacola, limparSacola, config } =
     useStore();
+  const [confirmandoLimpeza, setConfirmandoLimpeza] = useState(false);
 
   const finalizar = () => {
     let mensagem = `Olá, ${config.nomeLoja}! Quero fechar esse pedido:\n\n`;
@@ -47,12 +49,33 @@ const SacolaDrawer = ({ aberto, onClose }) => {
             >
               <FaWhatsapp className="text-xl" /> FECHAR NO WHATSAPP
             </button>
-            <button
-              onClick={limparSacola}
-              className="text-[11px] tracking-[0.14em] uppercase text-muted hover:text-rose transition-colors"
-            >
-              Esvaziar sacola
-            </button>
+            {confirmandoLimpeza ? (
+              <div className="flex items-center justify-center gap-2 animate-fade-in">
+                <span className="text-[11px] text-body">Tirar tudo da sacola?</span>
+                <button
+                  onClick={() => {
+                    limparSacola();
+                    setConfirmandoLimpeza(false);
+                  }}
+                  className="px-3 py-1.5 rounded-lg bg-red-600 text-white text-[10px] font-bold tracking-wide"
+                >
+                  SIM, ESVAZIAR
+                </button>
+                <button
+                  onClick={() => setConfirmandoLimpeza(false)}
+                  className="px-3 py-1.5 rounded-lg border border-line text-ink text-[10px] font-bold tracking-wide"
+                >
+                  CANCELAR
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setConfirmandoLimpeza(true)}
+                className="text-[11px] tracking-[0.14em] uppercase text-muted hover:text-rose transition-colors"
+              >
+                Esvaziar sacola
+              </button>
+            )}
             <p className="text-[11px] text-muted text-center leading-relaxed">
               O pagamento e a entrega são combinados diretamente com a loja.
             </p>

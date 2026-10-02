@@ -7,19 +7,16 @@ import {
   FaRegHeart,
   FaChevronLeft,
   FaChevronRight,
-  FaCamera,
+  FaCreditCard,
   FaTruck,
-  FaComments,
+  FaExchangeAlt,
+  FaRulerCombined,
+  FaLink,
+  FaCheck,
 } from 'react-icons/fa';
 import { useStore } from '../store/StoreContext';
 import { formatarPreco } from '../lib/utils';
 import { useEscape, useTravarScroll } from '../hooks/useHashRoute';
-
-const GARANTIAS = [
-  { icone: <FaCamera />, texto: 'Fotos reais da peça' },
-  { icone: <FaTruck />, texto: 'Entrega combinada com você' },
-  { icone: <FaComments />, texto: 'Dúvidas? A gente responde' },
-];
 
 const ProductModal = ({ product, onClose }) => {
   const { config, ehFavorito, alternarFavorito, adicionarNaSacola } = useStore();
@@ -27,6 +24,7 @@ const ProductModal = ({ product, onClose }) => {
   // O App monta este componente com key={produto.id}, então o estado
   // inicial já nasce certo para cada peça aberta.
   const [indiceImagem, setIndiceImagem] = useState(0);
+  const [linkCopiado, setLinkCopiado] = useState(false);
   const [tamanho, setTamanho] = useState(() => product?.tamanhos[0] || '');
   const [cor, setCor] = useState(() => product?.cores[0]?.nome || '');
 
@@ -46,6 +44,17 @@ const ProductModal = ({ product, onClose }) => {
   const navegarImagem = (delta) =>
     setIndiceImagem((i) => (i + delta + imagens.length) % imagens.length);
 
+  const copiarLink = async () => {
+    const endereco = `${window.location.origin}${window.location.pathname}#/peca/${product.slug}`;
+    try {
+      await navigator.clipboard.writeText(endereco);
+      setLinkCopiado(true);
+      setTimeout(() => setLinkCopiado(false), 2200);
+    } catch {
+      window.prompt('Copie o link da peça:', endereco);
+    }
+  };
+
   const chamarWhatsApp = () => {
     let mensagem = `Olá! Vi o catálogo da ${config.nomeLoja} e me interessei por:\n\n`;
     mensagem += `*${product.nome}* — ${formatarPreco(product.preco)}\n`;
@@ -64,7 +73,10 @@ const ProductModal = ({ product, onClose }) => {
       onClick={onClose}
     >
       <div
-        className="bg-cream w-full max-w-5xl md:rounded-[2rem] rounded-t-[2rem] sombra-flutuante overflow-hidden flex flex-col md:flex-row relative max-h-[94vh] md:max-h-[88vh] overflow-y-auto no-scrollbar animate-slide-up md:animate-scale-in"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="titulo-da-peca"
+        className="bg-cream w-full max-w-5xl md:rounded-[2rem] rounded-t-[2rem] sombra-flutuante flex flex-col relative max-h-[94vh] md:max-h-[88vh] overflow-hidden md:overflow-y-auto no-scrollbar animate-slide-up md:animate-scale-in"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -75,6 +87,8 @@ const ProductModal = ({ product, onClose }) => {
           <FaTimes className="text-sm" />
         </button>
 
+        {/* Tudo que rola: galeria + informações */}
+        <div className="flex-1 min-h-0 overflow-y-auto md:overflow-visible no-scrollbar flex flex-col md:flex-row">
         {/* Galeria */}
         <div className="w-full md:w-[54%] bg-white p-4 md:p-6 flex flex-col-reverse md:flex-row gap-3.5">
           {imagens.length > 1 && (
@@ -90,7 +104,11 @@ const ProductModal = ({ product, onClose }) => {
                       : 'opacity-50 hover:opacity-100'
                   }`}
                 >
-                  <img src={img} alt="" className="w-full h-full object-cover" />
+                  <img
+                    src={img}
+                    alt={`${product.nome} — foto ${i + 1}`}
+                    className="w-full h-full object-cover"
+                  />
                 </button>
               ))}
             </div>
@@ -100,7 +118,7 @@ const ProductModal = ({ product, onClose }) => {
             {imagemAtual ? (
               <img
                 src={imagemAtual}
-                alt={product.nome}
+                alt={`${product.nome} — foto ${indiceImagem + 1} de ${imagens.length}`}
                 className="w-full aspect-[3/4] object-cover rounded-2xl"
               />
             ) : (
@@ -149,7 +167,10 @@ const ProductModal = ({ product, onClose }) => {
             )}
           </div>
 
-          <h2 className="font-display text-ink text-[2rem] md:text-[2.4rem] leading-[1.1] mb-4">
+          <h2
+            id="titulo-da-peca"
+            className="font-display text-ink text-[2rem] md:text-[2.4rem] leading-[1.1] mb-4"
+          >
             {product.nome}
           </h2>
 
@@ -173,6 +194,17 @@ const ProductModal = ({ product, onClose }) => {
             <p className="text-body text-sm mb-6 leading-relaxed text-pretty">
               {product.descricao}
             </p>
+          )}
+
+          {product.medidas && (
+            <div className="mb-6 bg-sand border border-line rounded-xl p-4">
+              <p className="flex items-center gap-2 text-[11px] font-bold tracking-[0.14em] uppercase text-ink mb-2">
+                <FaRulerCombined className="text-rose" /> Medidas
+              </p>
+              <p className="text-[13px] text-body leading-relaxed whitespace-pre-line">
+                {product.medidas}
+              </p>
+            </div>
           )}
 
           {product.aviso && (
@@ -224,7 +256,9 @@ const ProductModal = ({ product, onClose }) => {
             </div>
           )}
 
-          <div className="mt-auto pt-2 flex flex-col gap-2.5">
+          {/* No celular o modal rola bastante: as ações ficam grudadas embaixo,
+              sempre à mão, em vez de só aparecerem no fim do conteúdo. */}
+          <div className="hidden md:flex mt-auto flex-col gap-2.5 pt-2">
             {product.esgotado ? (
               <button
                 onClick={chamarWhatsApp}
@@ -252,25 +286,77 @@ const ProductModal = ({ product, onClose }) => {
               </>
             )}
 
-            <button
-              onClick={() => alternarFavorito(product.id)}
-              className="w-full py-2.5 text-[10px] font-bold tracking-[0.16em] uppercase text-muted hover:text-rose transition-colors flex items-center justify-center gap-2"
-            >
-              {favorito ? <FaHeart className="text-rose" /> : <FaRegHeart />}
-              {favorito ? 'Salva nos favoritos' : 'Salvar nos favoritos'}
-            </button>
 
-            <div className="grid grid-cols-3 gap-2 pt-4 mt-1 border-t border-line">
-              {GARANTIAS.map((g) => (
-                <div key={g.texto} className="flex flex-col items-center text-center gap-1.5">
-                  <span className="text-rose text-sm">{g.icone}</span>
-                  <span className="text-[9px] leading-tight text-muted tracking-wide">
-                    {g.texto}
-                  </span>
-                </div>
-              ))}
+          </div>
+
+          <div className="order-last md:order-none">
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={() => alternarFavorito(product.id)}
+                className="py-3 text-[10px] font-bold tracking-[0.16em] uppercase text-muted hover:text-rose transition-colors flex items-center justify-center gap-2"
+              >
+                {favorito ? <FaHeart className="text-rose" /> : <FaRegHeart />}
+                {favorito ? 'Salva' : 'Salvar'}
+              </button>
+              <button
+                onClick={copiarLink}
+                className="py-3 text-[10px] font-bold tracking-[0.16em] uppercase text-muted hover:text-rose transition-colors flex items-center justify-center gap-2"
+              >
+                {linkCopiado ? <FaCheck className="text-green-700" /> : <FaLink />}
+                {linkCopiado ? 'Copiado' : 'Copiar link'}
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-2.5 pt-4 mt-1 border-t border-line">
+              {[
+                { icone: <FaCreditCard />, titulo: 'Pagamento', texto: config.pagamento },
+                { icone: <FaTruck />, titulo: 'Entrega', texto: config.entrega },
+                { icone: <FaExchangeAlt />, titulo: 'Troca', texto: config.troca },
+              ]
+                .filter((item) => item.texto)
+                .map((item) => (
+                  <div key={item.titulo} className="flex gap-2.5 items-start">
+                    <span className="text-rose text-[11px] mt-0.5">{item.icone}</span>
+                    <p className="text-[11px] leading-relaxed text-body">
+                      <span className="font-semibold text-ink">{item.titulo}:</span>{' '}
+                      {item.texto}
+                    </p>
+                  </div>
+                ))}
             </div>
           </div>
+        </div>
+        </div>
+
+        {/* Barra de ação do celular: sempre à mão, sem precisar rolar */}
+        <div className="md:hidden shrink-0 border-t border-line bg-cream px-4 py-3.5 flex items-center gap-2.5">
+          {product.esgotado ? (
+            <button
+              onClick={chamarWhatsApp}
+              className="flex-1 py-4 bg-ink text-cream rounded-2xl text-[11px] font-bold tracking-[0.16em] uppercase flex items-center justify-center gap-2.5"
+            >
+              <FaWhatsapp className="text-base" /> Avise-me quando chegar
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={() => {
+                  adicionarNaSacola(product, { tamanho, cor });
+                  onClose();
+                }}
+                className="flex-1 py-4 bg-ink text-cream rounded-2xl text-[11px] font-bold tracking-[0.16em] uppercase flex items-center justify-center gap-2.5"
+              >
+                <FaShoppingBag className="text-sm" /> Adicionar à sacola
+              </button>
+              <button
+                onClick={chamarWhatsApp}
+                aria-label="Comprar agora pelo WhatsApp"
+                className="w-14 h-14 shrink-0 rounded-2xl bg-cream border border-line text-[#25D366] flex items-center justify-center"
+              >
+                <FaWhatsapp className="text-2xl" />
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

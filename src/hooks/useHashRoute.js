@@ -11,9 +11,11 @@ export function useHashRoute() {
     return () => window.removeEventListener('hashchange', aoMudar);
   }, []);
 
-  const navegar = (destino) => {
+  const navegar = (destino, { semRolar = false } = {}) => {
     window.location.hash = destino;
-    window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
+    if (!semRolar) {
+      window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
+    }
   };
 
   return [rota, navegar];

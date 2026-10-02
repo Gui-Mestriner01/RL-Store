@@ -1,12 +1,25 @@
+import { useMemo, useState } from 'react';
 import { FaWhatsapp, FaArrowDown, FaStar } from 'react-icons/fa';
 import { useStore } from '../store/StoreContext';
 import { midia } from '../lib/utils';
 import { useParallax, useSeguirMouse } from '../hooks/animacoes';
 import Numero from './Numero';
 
+const DIAS_DE_NOVIDADE = 15;
+
 const HeroBanner = () => {
   const { config, produtosVisiveis, categorias } = useStore();
-  const novidades = produtosVisiveis.filter((p) => p.novoLancamento).length;
+
+  // "novidades" conta peças cadastradas nos últimos 15 dias — antes era uma
+  // marcação manual que nunca expirava e o banner mentia depois de um tempo
+  const [agora] = useState(() => Date.now());
+  const novidades = useMemo(() => {
+    const limite = agora - DIAS_DE_NOVIDADE * 24 * 60 * 60 * 1000;
+    return produtosVisiveis.filter((p) => {
+      const data = Date.parse(p.criadoEm);
+      return Number.isFinite(data) && data >= limite;
+    }).length;
+  }, [produtosVisiveis, agora]);
 
   const arara = useParallax(0.05);
   const monograma = useParallax(0.09);
@@ -60,7 +73,9 @@ const HeroBanner = () => {
         <div className="w-full md:w-[58%] lg:w-[52%] flex flex-col items-center md:items-start text-center md:text-left">
           <span className="inline-flex items-center gap-2.5 text-[10px] font-bold tracking-[0.24em] uppercase text-rosedark bg-cream/90 border border-line px-4 py-2 rounded-full mb-8 sombra-suave animate-fade-up">
             <span className="w-1.5 h-1.5 rounded-full bg-rose animate-pulse" />
-            {novidades > 0 ? `${novidades} novidades essa semana` : 'Curadoria da semana'}
+            {novidades > 0
+              ? `${novidades} ${novidades === 1 ? 'novidade' : 'novidades'} nos últimos ${DIAS_DE_NOVIDADE} dias`
+              : `Entrega em ${config.cidade}`}
           </span>
 
           <img

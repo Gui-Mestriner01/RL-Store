@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { FaWhatsapp, FaArrowUp } from 'react-icons/fa';
 
 import Header from './components/Header';
@@ -21,6 +21,7 @@ import FavoritosDrawer from './components/FavoritosDrawer';
 
 import { useStore } from './store/StoreContext';
 import { useRevelar, useTituloAoSair } from './hooks/animacoes';
+import { useHashRoute } from './hooks/useHashRoute';
 
 const POR_PAGINA = 8;
 
@@ -34,9 +35,37 @@ function App() {
   const [categoria, setCategoria] = useState('Todos');
   const [ordenacao, setOrdenacao] = useState('destaque');
   const [visiveis, setVisiveis] = useState(POR_PAGINA);
-  const [produtoAberto, setProdutoAberto] = useState(null);
   const [sacolaAberta, setSacolaAberta] = useState(false);
   const [favoritosAbertos, setFavoritosAbertos] = useState(false);
+
+  // Cada peça tem endereço próprio (#/peca/slug). Assim dá para mandar o link
+  // de uma peça no WhatsApp e o botão voltar do celular fecha o modal.
+  const [rota, navegar] = useHashRoute();
+  const abertoPorDentro = useRef(false);
+
+  const slugAberto = rota.startsWith('/peca/')
+    ? decodeURIComponent(rota.slice('/peca/'.length))
+    : null;
+
+  const produtoAberto = useMemo(
+    () => (slugAberto ? produtosVisiveis.find((p) => p.slug === slugAberto) || null : null),
+    [slugAberto, produtosVisiveis]
+  );
+
+  const abrirProduto = (produto) => {
+    if (!produto) return;
+    abertoPorDentro.current = true;
+    navegar(`/peca/${produto.slug}`, { semRolar: true });
+  };
+
+  const fecharProduto = () => {
+    if (abertoPorDentro.current) {
+      abertoPorDentro.current = false;
+      window.history.back();
+    } else {
+      navegar('/', { semRolar: true });
+    }
+  };
 
   // reanima sempre que a vitrine muda (filtro, busca, "ver mais")
   useRevelar(`${categoria}|${busca}|${ordenacao}|${visiveis}`);
@@ -98,13 +127,23 @@ function App() {
           setBusca(v);
           setVisiveis(POR_PAGINA);
         }}
-        onAbrirFavoritos={() => setFavoritosAbertos(true)}
-        onAbrirSacola={() => setSacolaAberta(true)}
+        onAbrirFavoritos={() => {
+          setSacolaAberta(false);
+          setFavoritosAbertos(true);
+        }}
+        onAbrirSacola={() => {
+          setFavoritosAbertos(false);
+          setSacolaAberta(true);
+        }}
+        onAbrirBusca={() => {
+          setSacolaAberta(false);
+          setFavoritosAbertos(false);
+        }}
       />
 
       <HeroBanner />
 
-      <Destaques onSelecionar={setProdutoAberto} />
+      <Destaques onSelecionar={abrirProduto} />
 
       <main id="catalogo" className="px-5 md:px-8 max-w-[1280px] mx-auto">
         <CategoryFilter
@@ -119,7 +158,7 @@ function App() {
         <div className="pb-20">
           <ProductGrid
             produtos={mostrar}
-            onSelecionar={setProdutoAberto}
+            onSelecionar={abrirProduto}
             aoLimpar={limparFiltros}
           />
 
@@ -145,8 +184,14 @@ function App() {
       <Footer />
 
       <BottomNav
-        onAbrirFavoritos={() => setFavoritosAbertos(true)}
-        onAbrirSacola={() => setSacolaAberta(true)}
+        onAbrirFavoritos={() => {
+          setSacolaAberta(false);
+          setFavoritosAbertos(true);
+        }}
+        onAbrirSacola={() => {
+          setFavoritosAbertos(false);
+          setSacolaAberta(true);
+        }}
       />
 
       {/* Botões flutuantes (desktop) */}
@@ -170,17 +215,13 @@ function App() {
       </div>
 
       {produtoAberto && (
-        <ProductModal
-          key={produtoAberto.id}
-          product={produtoAberto}
-          onClose={() => setProdutoAberto(null)}
-        />
+        <ProductModal key={produtoAberto.id} product={produtoAberto} onClose={fecharProduto} />
       )}
       <SacolaDrawer aberto={sacolaAberta} onClose={() => setSacolaAberta(false)} />
       <FavoritosDrawer
         aberto={favoritosAbertos}
         onClose={() => setFavoritosAbertos(false)}
-        onAbrirProduto={setProdutoAberto}
+        onAbrirProduto={abrirProduto}
       />
     </div>
   );

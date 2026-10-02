@@ -107,7 +107,10 @@ const PainelConfig = () => {
               />
             </Campo>
 
-            <Campo rotulo="Recado da faixa superior">
+            <Campo
+              rotulo="Cidade da entrega"
+              dica="Aparece na faixa preta do topo e nos benefícios. Ex.: Guararapes e região"
+            >
               <input value={form.cidade} onChange={(e) => mudar('cidade', e.target.value)} className={entrada} />
             </Campo>
           </Bloco>
@@ -130,6 +133,38 @@ const PainelConfig = () => {
                 />
               </Campo>
             </div>
+          </Bloco>
+
+          <Bloco
+            titulo="Informações de compra"
+            descricao="Aparecem na página de cada peça — são as dúvidas que mais chegam no WhatsApp."
+          >
+            <Campo rotulo="Formas de pagamento">
+              <input
+                value={form.pagamento || ''}
+                onChange={(e) => mudar('pagamento', e.target.value)}
+                placeholder="Pix, dinheiro ou cartão"
+                className={entrada}
+              />
+            </Campo>
+
+            <Campo rotulo="Entrega" dica="Diga a cidade e, se puder, o valor ou a condição de frete grátis.">
+              <input
+                value={form.entrega || ''}
+                onChange={(e) => mudar('entrega', e.target.value)}
+                placeholder="Entrega em Guararapes e região"
+                className={entrada}
+              />
+            </Campo>
+
+            <Campo rotulo="Troca">
+              <input
+                value={form.troca || ''}
+                onChange={(e) => mudar('troca', e.target.value)}
+                placeholder="Troca em até 7 dias, com a peça sem uso"
+                className={entrada}
+              />
+            </Campo>
           </Bloco>
 
           <Bloco titulo="Categorias" descricao="Os filtros que aparecem acima do catálogo.">
@@ -186,10 +221,15 @@ const PainelConfig = () => {
                   <code className="block bg-cream border border-line rounded-lg px-3 py-2 text-[11px] text-rosedark mb-2">
                     npm run senha
                   </code>
-                  <p className="text-muted text-[11px]">
+                  <p className="text-muted text-[11px] mb-2">
                     O comando pede a nova senha, grava só o hash em
                     <span className="text-ink"> src/data/acesso.js</span> e aí é só
                     publicar o site de novo.
+                  </p>
+                  <p className="text-muted text-[11px]">
+                    A senha fica guardada como hash (PBKDF2), nunca em texto puro.
+                    Como o site não tem servidor, isso protege contra acesso casual
+                    — não guarde dados de clientes ou pagamento por aqui.
                   </p>
                 </div>
               </div>

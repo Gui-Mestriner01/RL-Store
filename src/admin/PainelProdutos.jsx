@@ -13,6 +13,7 @@ import {
   FaTags,
   FaEyeSlash,
   FaBolt,
+  FaCloudUploadAlt,
 } from 'react-icons/fa';
 import { useStore } from '../store/StoreContext';
 import { formatarPreco, parsePreco } from '../lib/utils';
@@ -64,10 +65,11 @@ const FILTROS = [
   { id: 'ocultas', rotulo: 'Ocultas' },
 ];
 
-const PainelProdutos = ({ onNovo, onEditar }) => {
+const PainelProdutos = ({ onNovo, onEditar, onPublicar }) => {
   const {
     produtos,
     categorias,
+    alteracoesNaoPublicadas,
     alternarCampo,
     removerProduto,
     atualizarProduto,
@@ -124,6 +126,26 @@ const PainelProdutos = ({ onNovo, onEditar }) => {
           <FaPlus className="text-[11px]" /> Nova peça
         </button>
       </header>
+
+      {alteracoesNaoPublicadas && (
+        <button
+          onClick={onPublicar}
+          className="w-full text-left flex items-start gap-3.5 bg-blush/40 border border-rose/40 rounded-2xl p-4 mb-5 hover:border-rose transition-colors group"
+        >
+          <FaCloudUploadAlt className="text-rose shrink-0 mt-0.5" />
+          <span className="flex-1">
+            <span className="block text-[13px] font-semibold text-ink">
+              Suas alterações ainda não estão no site
+            </span>
+            <span className="block text-[12px] text-body mt-0.5">
+              Clique aqui para publicar e deixar o catálogo igual para quem acessa.
+            </span>
+          </span>
+          <span className="text-[10px] font-bold tracking-[0.14em] uppercase text-rosedark group-hover:translate-x-0.5 transition-transform shrink-0 mt-1">
+            Publicar
+          </span>
+        </button>
+      )}
 
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-7">
         <CartaoMetrica icone={<FaTags />} rotulo="No catálogo" valor={<Numero valor={stats.total} />} destaque />

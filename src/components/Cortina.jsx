@@ -24,7 +24,12 @@ const Cortina = () => {
   return (
     <div className="cortina" data-saindo={saindo} aria-hidden="true">
       <div className="flex flex-col items-center gap-5">
-        <img src={midia('logo.png')} alt="" className="h-16 object-contain animate-fade-in" />
+        <img
+          src={midia('logo.png')}
+          alt=""
+          aria-hidden="true"
+          className="h-16 object-contain animate-fade-in"
+        />
         <div className="cortina-anel" />
       </div>
     </div>

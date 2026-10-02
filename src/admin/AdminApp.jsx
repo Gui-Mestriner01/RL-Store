@@ -19,7 +19,7 @@ import { abrirSessao, sessaoValida, fecharSessao } from '../lib/seguranca';
 const ABAS = [
   { id: 'produtos', rotulo: 'Peças', icone: <FaBoxOpen />, descricao: 'Catálogo da loja' },
   { id: 'config', rotulo: 'Loja', icone: <FaCog />, descricao: 'Textos e contatos' },
-  { id: 'backup', rotulo: 'Backup', icone: <FaCloudDownloadAlt />, descricao: 'Exportar e importar' },
+  { id: 'backup', rotulo: 'Publicar', icone: <FaCloudDownloadAlt />, descricao: 'Mandar para o site' },
 ];
 
 const AdminApp = () => {
@@ -85,7 +85,7 @@ const AdminApp = () => {
       {/* ---------- menu lateral (PC) ---------- */}
       <aside className="hidden md:flex flex-col w-[248px] shrink-0 bg-ink text-cream/70 min-h-screen sticky top-0 grao">
         <div className="px-6 pt-7 pb-6 border-b border-cream/10">
-          <img src={midia("logo.png")} alt="" className="h-12 object-contain mb-4 brightness-0 invert opacity-90" />
+          <img src={midia("logo.png")} alt="" aria-hidden="true" className="h-12 object-contain mb-4 brightness-0 invert opacity-90" />
           <p className="text-[9px] tracking-[0.24em] uppercase text-rose font-bold">Painel</p>
           <p className="text-cream text-sm font-medium mt-1">{config.nomeLoja}</p>
         </div>
@@ -144,7 +144,7 @@ const AdminApp = () => {
       <div className="md:hidden sticky top-0 z-40 glass border-b border-line">
         <div className="px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <img src={midia("logo.png")} alt="" className="h-9 object-contain" />
+            <img src={midia("logo.png")} alt="" aria-hidden="true" className="h-9 object-contain" />
             <div>
               <p className="text-[9px] tracking-[0.2em] uppercase text-rose font-bold">Painel</p>
               <p className="text-[13px] text-ink font-medium leading-tight">{config.nomeLoja}</p>
@@ -185,7 +185,13 @@ const AdminApp = () => {
       {/* ---------- conteúdo ---------- */}
       <main className="flex-1 min-w-0 px-4 md:px-9 py-6 md:py-9">
         <div className="max-w-[1080px] mx-auto">
-          {aba === 'produtos' && <PainelProdutos onNovo={abrirNovo} onEditar={abrirEdicao} />}
+          {aba === 'produtos' && (
+            <PainelProdutos
+              onNovo={abrirNovo}
+              onEditar={abrirEdicao}
+              onPublicar={() => setAba('backup')}
+            />
+          )}
           {aba === 'config' && <PainelConfig />}
           {aba === 'backup' && <PainelBackup />}
         </div>
